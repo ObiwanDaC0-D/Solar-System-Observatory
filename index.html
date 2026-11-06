@@ -63,25 +63,81 @@ th{position:sticky;top:0;background:#17253d;z-index:1}th,td{font-variant-numeric
 #sectionLayout .section-grip,#skyArcsLayout .subsection-grip{touch-action:none;-webkit-user-select:none;user-select:none}
 /* Minimal centered two-line handle for expand and drag. */
 .section-grip svg,.subsection-grip svg{display:block;width:22px;height:22px;margin:auto;pointer-events:none}
+
+/* Observatory 3.1 — cohesive, mobile-first UI refinement */
+:root{--ui-gap:12px;--ui-radius:14px;--ui-border:#354c63;--ui-inset:#102238;--ui-muted:#a9bad1}
+header{padding:14px 3px 10px}
+header .eyebrow{font-size:10px;letter-spacing:1.7px}
+header h1{margin:6px 0 5px;line-height:1.1}
+.panel{box-shadow:none;border-color:#31455e;padding:16px;margin:12px 0}
+.panel>details>summary{min-height:46px}
+.panel>details>summary h2{font-size:19px}
+.panel .body>p.muted:first-child{margin-bottom:10px}
+.observation-sticky{padding:7px 0;box-shadow:0 5px 12px rgba(11,22,40,.24)}
+.observation-controls{gap:8px}
+.observation-controls button,.observation-controls input{border-radius:10px}
+.coordinate-controls{margin:8px 0 10px}
+.coordinate-controls button{min-height:42px}
+#skyArcsLayout{gap:10px}
+#skyArcsLayout>.inspect-disclosure,#skyArcsLayout>#skyChartBlock{border:1px solid var(--ui-border);background:var(--ui-inset);border-radius:var(--ui-radius);box-shadow:none}
+#skyArcsLayout>.inspect-disclosure{padding:10px 13px}
+#skyArcsLayout>.inspect-disclosure>.inspect-summary{min-height:42px}
+#skyArcsLayout>.inspect-disclosure>.inspect-content{padding-top:9px}
+#skyArcsLayout>#skyChartBlock{padding:10px 12px}
+#skyArcsLayout .sky-chart-heading{min-height:42px}
+#skyArcsLayout #chartcomparison{margin:3px 0 7px!important}
+#skyArcsLayout #readout{margin-top:9px;padding:10px 12px;line-height:1.55}
+#skyArcsLayout .toolbar{margin:8px 0;gap:7px}
+#skyArcsLayout .chips{margin:9px 0}
+#skyArcsLayout .section-grip,#skyArcsLayout .subsection-grip{box-shadow:none}
+.section-grip,.subsection-grip{background:transparent!important;border:1px solid rgba(157,183,208,.25)!important;color:#a8c4d3!important;transition:background-color .15s ease,border-color .15s ease}
+.section-grip:active,.subsection-grip:active,.is-dragging .section-grip,.is-dragging .subsection-grip{background:#274457!important;border-color:#8ddbd0!important}
+.panel.drop-before,#skyArcsLayout>.drop-before{box-shadow:0 -3px 0 #8ddbd0}
+.panel.drop-after,#skyArcsLayout>.drop-after{box-shadow:0 3px 0 #8ddbd0}
+#selectors .body-choice{min-height:44px;padding:9px 13px}
+#selectors .body-choice[aria-pressed="false"]{opacity:.85}
+#selectors .body-choice[aria-pressed="true"]{border-color:#8ddbd0}
+#chart{min-width:0!important;width:100%;height:auto;touch-action:pan-y}
+#explorerChart{min-width:0!important;width:100%;height:auto}
+.chartwrap{overflow-x:auto}
+.scroll{position:relative}
+.scroll:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.scroll table{min-width:max-content}
+.scroll th{font-size:12px}
+.scroll td{font-size:13px}
+button:focus-visible,select:focus-visible,.subsection-grip:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+@media(max-width:600px){
+ body{padding:10px}
+ header{padding-top:9px}
+ header h1{font-size:clamp(24px,6.5vw,31px)}
+ .panel{padding:13px 12px;margin:10px 0}
+ #skyArcsLayout>.inspect-disclosure{padding:9px 11px}
+ #skyArcsLayout>#skyChartBlock{padding:9px}
+ #skyArcsLayout #readout{font-size:12px}
+ .observation-controls{gap:6px}
+ .observation-controls input,.observation-controls button{font-size:clamp(12px,3.3vw,14px)}
+ .scroll th,.scroll td{padding:10px 9px}
+}
+
 </style></head><body><main>
-<header><div><div class="eyebrow">CELESTIAL RHYTHMS · PLANETARY EPHEMERIDES</div><h1>Solar System Observatory</h1><div class="muted" id="place">Huntington, West Virginia · 38.415° N, 82.445° W</div></div></header>
+<header><div><div class="eyebrow">CELESTIAL RHYTHMS</div><h1>Solar System Observatory</h1><div class="muted" id="place">Huntington, West Virginia · 38.415° N, 82.445° W</div></div></header>
 <div class="observation-sticky" role="group" aria-label="Observation date and location"><div class="controls observation-controls"><input id="date" type="date" aria-label="Observation date"><button id="today">Today</button><button id="gps">Use GPS</button></div></div><div class="coordinate-controls"><button id="coords">Coordinates</button></div>
 <div id="sectionLayout" aria-label="Reorderable observatory sections">
 <section class="panel" data-section-id="section-0"><details open id="fold-daily"><summary><h2>Overview</h2></summary><div class="body"><p class="muted">Rise, peak altitude time, set, and time above the horizon for your selected bodies.</p>
 <div class="scroll"><table><thead><tr><th>Body</th><th>Rise</th><th>Peak altitude</th><th>Set</th><th>Sky time</th></tr></thead><tbody id="daily"></tbody></table></div>
 </div></details></section>
 <section class="panel" data-section-id="section-1"><details open><summary><h2>Sky Arcs</h2></summary><div class="body">
-<p class="muted">Compare celestial altitude throughout the day. Drag the chart to inspect any time.</p><div id="skyArcsLayout" aria-label="Reorder Sky Arcs controls and chart"><details class="note inspect-disclosure" id="viewDisclosure" open style="margin:12px 0"><summary class="inspect-summary"><strong style="color:#8ddbd0">View</strong></summary><div class="inspect-content">
+<p class="muted sky-intro">Explore altitude throughout the day. Drag the chart to inspect a time.</p><div id="skyArcsLayout" aria-label="Reorder Sky Arcs controls and chart"><details class="note inspect-disclosure" id="viewDisclosure" open style="margin:12px 0"><summary class="inspect-summary"><strong style="color:#8ddbd0">View</strong></summary><div class="inspect-content">
 <div class="toolbar"><button id="above" aria-pressed="true">Above horizon</button><button id="full" aria-pressed="false">Full sky</button></div><div class="toolbar" style="margin-top:5px"><button id="toggleNow" aria-pressed="true">Now line: On</button><button id="jumpNow">Jump to now</button></div></div></details>
 <details class="note inspect-disclosure" id="bodiesDisclosure" open style="margin:12px 0"><summary class="inspect-summary"><strong style="color:#8ddbd0">Celestial bodies</strong></summary><div class="inspect-content">
 <div class="chips" id="selectors"></div><div class="toolbar" style="margin-top:10px"><button id="all">Select all</button><button id="none">Clear planets</button></div></div></details>
 <div class="sky-chart-block note" id="skyChartBlock"><div class="sky-chart-heading"><span class="muted">Celestial arcs</span></div><div class="muted" id="chartcomparison" style="margin:8px 0;color:#8ddbd0"></div>
 <div class="chartwrap"><svg id="chart" viewBox="0 0 760 340" tabindex="0" role="img" aria-label="Interactive celestial altitude chart"></svg></div>
-<div class="readout" id="readout" aria-live="polite">Select a time on the chart to inspect celestial positions.</div></div>
+<div class="readout" id="readout" aria-live="polite">Drag across the chart to inspect a time.</div></div>
 <details class="note inspect-disclosure" id="planetInspector" open style="margin:15px 0 12px">
 <summary class="inspect-summary"><strong style="color:#8ddbd0">Inspect</strong></summary>
 <div class="inspect-content"><button type="button" id="clearPlanetHighlight" class="inspect-clear" hidden>Clear selection</button>
-<p class="muted" style="margin:7px 0 10px">Tap a body to highlight its arc; tap it again to show all arcs. Switch to Shared sky to compare time above the horizon with the Sun.</p>
+<p class="muted" style="margin:7px 0 10px">Tap a body to highlight it. Tap again to show all arcs.</p>
 <div class="inspect-options" id="planetHighlightTicks" role="group" aria-label="Choose a celestial body"></div>
 <div class="toolbar inspect-modes" role="group" aria-label="Inspect mode"><button id="inspectPosition" type="button" aria-pressed="true">Position</button><button id="inspectShared" type="button" aria-pressed="false">Shared sky</button></div>
 <div id="planetHighlightDetails" class="muted" style="margin-top:10px" aria-live="polite"></div>
@@ -89,9 +145,9 @@ th{position:sticky;top:0;background:#17253d;z-index:1}th,td{font-variant-numeric
 </div></details>
 </div>
 </div></details></section>
-<section class="panel" data-section-id="section-2"><details open><summary><h2>Outlook</h2></summary><div class="body"><div class="toolbar"><button data-days="5" aria-pressed="true">5 days</button><button data-days="10" aria-pressed="false">10 days</button><button data-days="30" aria-pressed="false">30 days</button></div><p class="muted">Choose a day to inspect its full planetary chart. Outlook focuses on rise and set times for the Sun, Moon, and selected planet.</p><div class="toolbar"><label for="focus">Planet</label><select id="focus" style="background:#263852;color:#edf3ff;border:1px solid #4b607c;border-radius:9px;padding:9px"></select></div><div class="scroll"><table><thead><tr><th>Date</th><th>Sunrise</th><th>Sunset</th><th>Moonrise</th><th>Moonset</th><th id="focushead">Planet rise</th><th>Set</th></tr></thead><tbody id="outlook"></tbody></table></div></div></details></section>
+<section class="panel" data-section-id="section-2"><details open><summary><h2>Outlook</h2></summary><div class="body"><div class="toolbar"><button data-days="5" aria-pressed="true">5 days</button><button data-days="10" aria-pressed="false">10 days</button><button data-days="30" aria-pressed="false">30 days</button></div><p class="muted">Tap a date to explore its sky. Rise and set times are shown for the Sun, Moon, and chosen planet.</p><div class="toolbar"><label for="focus">Planet</label><select id="focus" style="background:#263852;color:#edf3ff;border:1px solid #4b607c;border-radius:9px;padding:9px"></select></div><div class="scroll"><table><thead><tr><th>Date</th><th>Sunrise</th><th>Sunset</th><th>Moonrise</th><th>Moonset</th><th id="focushead">Planet rise</th><th>Set</th></tr></thead><tbody id="outlook"></tbody></table></div></div></details></section>
 
-<section class="panel" data-section-id="section-3"><details open id="fold-explorer"><summary><h2>Sky Overlap</h2></summary><div class="body"><p class="muted">Discover when any combination of planets, the Moon, and the Sun share the sky. An overlap means all selected bodies are simultaneously above the horizon; it does not guarantee naked-eye visibility.</p>
+<section class="panel" data-section-id="section-3"><details open id="fold-explorer"><summary><h2>Sky Overlap</h2></summary><div class="body"><p class="muted">Find when two or more bodies are above the horizon together. Daylight may prevent visibility.</p>
 <div class="toolbar" id="explorerModes"><button data-explore="pair" aria-pressed="false">Two bodies</button><button data-explore="multiple" aria-pressed="true">Multiple bodies</button><button data-explore="maximum" aria-pressed="false">Maximum overlap</button></div>
 <div id="explorerSelection"><div class="chips" id="explorerChips"></div><p class="muted" id="explorerHint">Choose at least two bodies.</p></div>
 <div class="note"><div class="shared-heading"><strong id="explorerTitle" style="color:#8ddbd0">Multi-body shared sky</strong><strong id="explorerDuration" style="font-size:20px">—</strong></div><div id="explorerResult" class="muted" style="margin-top:10px"></div></div>
@@ -99,13 +155,13 @@ th{position:sticky;top:0;background:#17253d;z-index:1}th,td{font-variant-numeric
 <div id="explorerWindows" class="muted" style="margin-top:10px"></div>
 <div id="explorerRanking" class="scroll" style="margin-top:14px"></div>
 </div></details></section>
-<section class="panel" data-section-id="section-4"><details open id="fold-horizon"><summary><h2>Sky Map</h2></summary><div class="body"><p class="muted">Overhead view at the selected chart time. North is up, the outer circle is the horizon, and the center is directly overhead. Select a marker for its coordinates.</p><div class="sky-layout"><svg id="skymap" class="sky-map" viewBox="0 0 420 420" role="img" tabindex="0" aria-label="Interactive sky map"></svg><div><div class="readout" id="skyreadout" aria-live="polite">Select a body.</div><div class="sky-key" id="skykey"></div><p class="muted">Only objects above the geometric horizon are plotted. Apparent sizes are illustrative. Daylight can obscure planets.</p></div></div></div></details></section>
-<section class="panel" data-section-id="section-5"><details open><summary><h2>Visibility</h2></summary><div class="body"><p class="muted">Geometric horizon status at the selected time. Being above the horizon does not guarantee naked-eye visibility.</p><div class="cards" id="cards"></div></div></details></section>
+<section class="panel" data-section-id="section-4"><details open id="fold-horizon"><summary><h2>Sky Map</h2></summary><div class="body"><p class="muted">Sky at the selected time. North is up; the edge is the horizon. Tap a body for details.</p><div class="sky-layout"><svg id="skymap" class="sky-map" viewBox="0 0 420 420" role="img" tabindex="0" aria-label="Interactive sky map"></svg><div><div class="readout" id="skyreadout" aria-live="polite">Select a body.</div><div class="sky-key" id="skykey"></div><p class="muted">Only objects above the geometric horizon are plotted. Apparent sizes are illustrative. Daylight can obscure planets.</p></div></div></div></details></section>
+<section class="panel" data-section-id="section-5"><details open><summary><h2>Visibility</h2></summary><div class="body"><p class="muted">Above-horizon status at the selected time; visibility depends on conditions.</p><div class="cards" id="cards"></div></div></details></section>
 
 <section class="panel" data-section-id="section-6"><details open><summary><h2>Moon phase</h2></summary><div class="body"><div class="phase"><div class="moonicon" id="moonicon" aria-hidden="true">🌙</div><div><strong id="phasename" style="font-size:23px">—</strong><div class="muted">Geocentric illuminated fraction, at local noon</div></div></div><div class="stats"><div class="stat">Illumination<strong id="illum">—</strong></div><div class="stat">Moon age<strong id="age">—</strong></div><div class="stat">Synodic cycle<strong>29.53 d</strong></div></div></div></details></section>
 </div>
 <div id="loading" class="muted" role="status">Loading astronomy engine…</div>
-<div id="layoutToolbar" class="layout-toolbar"><span class="muted">Customize section order using the drag handles.</span><button id="resetLayout" type="button">Reset layout</button></div>
+<div id="layoutToolbar" class="layout-toolbar"><span class="muted">Tap a handle to expand; hold to move.</span><button id="resetLayout" type="button">Reset layout</button></div>
 <footer><strong>Data and accuracy</strong><p>Planetary and lunar positions are calculated locally with Astronomy Engine (VSOP87/ELP-based analytical astronomy). This is not a live telescope feed. Rise/set calculations use geometric altitude crossing at 0°, except the Sun, which uses −0.833° to approximate the visible solar limb and refraction. Results are approximate and can differ from observed times due to terrain, elevation, weather, and atmospheric refraction. Times are shown in the browser's local time zone, not automatically the time zone of manually entered coordinates. An internet connection is needed to load the astronomy library. Do not use for navigation or safety-critical decisions.</p><div id="status"></div></footer>
 </main>
 <script type="module">
