@@ -61,7 +61,7 @@ th{position:sticky;top:0;background:#17253d;z-index:1}th,td{font-variant-numeric
 #skyArcsLayout>.inspect-disclosure>.inspect-summary:after{display:none}
 #skyArcsLayout>.inspect-disclosure>.inspect-summary{padding-right:48px}
 #sectionLayout .section-grip,#skyArcsLayout .subsection-grip{touch-action:none;-webkit-user-select:none;user-select:none}
-/* Center the four-way move icon consistently in both drag handles. */
+/* Minimal centered two-line handle for expand and drag. */
 .section-grip svg,.subsection-grip svg{display:block;width:22px;height:22px;margin:auto;pointer-events:none}
 </style></head><body><main>
 <header><div><div class="eyebrow">CELESTIAL RHYTHMS · PLANETARY EPHEMERIDES</div><h1>Solar System Observatory</h1><div class="muted" id="place">Huntington, West Virginia · 38.415° N, 82.445° W</div></div></header>
@@ -247,7 +247,7 @@ function initSectionReorder(){
   const disclosure=panel.querySelector('details'),summary=disclosure.querySelector('summary');
   const name=summary.querySelector('h2').textContent;
   const handle=document.createElement('button');
-  handle.type='button';handle.className='section-grip';handle.innerHTML='<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M2 12h20M8 6l4-4 4 4M8 18l4 4 4-4M6 8l-4 4 4 4M18 8l4 4-4 4"/></svg>';
+  handle.type='button';handle.className='section-grip';handle.innerHTML='<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 9h12M6 15h12"/></svg>';
   handle.setAttribute('aria-label',name+': tap to expand or collapse; hold to move. Arrow keys reorder.');
   handle.setAttribute('aria-expanded',String(disclosure.open));
   handle.title='Tap to expand or collapse; hold to move';
@@ -327,7 +327,7 @@ function initSkyArcsReorder(){
   const disclosure=panel.matches('details')?panel:null;
   const heading=disclosure?panel.querySelector(':scope > summary'):panel.querySelector('.sky-chart-heading');
   const name=heading.textContent.trim();
-  const grip=document.createElement('button');grip.type='button';grip.className='subsection-grip';grip.innerHTML='<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M2 12h20M8 6l4-4 4 4M8 18l4 4 4-4M6 8l-4 4 4 4M18 8l4 4-4 4"/></svg>';
+  const grip=document.createElement('button');grip.type='button';grip.className='subsection-grip';grip.innerHTML='<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 9h12M6 15h12"/></svg>';
   grip.setAttribute('aria-label',name+(disclosure?': tap to expand or collapse; hold to move.':': hold to move.')+' Arrow keys reorder.');
   grip.title=disclosure?'Tap to expand or collapse; hold to move':'Hold to move';
   if(disclosure){
