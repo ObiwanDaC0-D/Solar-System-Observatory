@@ -30,6 +30,7 @@ th{position:sticky;top:0;background:#17253d;z-index:1}th,td{font-variant-numeric
 .planetcard:hover{border-color:#58748e}
 @media(max-width:600px){body{padding:10px}.panel{padding:13px;margin:10px 0}header{padding-top:13px}h1{font-size:clamp(24px,7vw,32px)}.controls button,.toolbar button{flex:1 1 auto}.chips label{font-size:12px}.note,.readout{padding:12px}th,td{padding:11px 8px}.stats{gap:6px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition-duration:0s!important;animation-duration:0s!important}}
+.inspect-options{display:flex;flex-wrap:wrap;gap:8px}.inspect-choice{min-height:40px;border-radius:22px;padding:8px 14px;border:1px solid #4b607c;background:#17253d;color:#edf3ff;font-size:13px;cursor:pointer}.inspect-choice[aria-pressed="true"]{background:#284b59;border-color:var(--planet-color);box-shadow:inset 0 0 0 1px var(--planet-color)}.inspect-choice:focus-visible,.inspect-clear:focus-visible{outline:2px solid #8ddbd0;outline-offset:2px}.inspect-clear{min-height:36px;font-size:12px;padding:6px 10px}.inspect-clear[hidden]{display:none!important}
 </style></head><body><main>
 <header><div><div class="eyebrow">CELESTIAL RHYTHMS · PLANETARY EPHEMERIDES</div><h1>Solar System Observatory</h1><div class="muted" id="place">Huntington, West Virginia · 38.415° N, 82.445° W</div></div><div style="font-size:30px" aria-hidden="true">☀️ 🪐 ☾</div></header>
 <div class="controls"><input id="date" type="date" aria-label="Observation date"><button id="today">Today</button><button id="gps">Use GPS</button><button id="coords">Coordinates</button></div>
@@ -41,9 +42,7 @@ th{position:sticky;top:0;background:#17253d;z-index:1}th,td{font-variant-numeric
 <p class="muted">Compare celestial altitude throughout the day. Drag the chart to inspect any time.</p><div class="muted" style="font-weight:650;margin:12px 0 5px">View</div>
 <div class="toolbar"><button id="above" aria-pressed="true">Above horizon</button><button id="full" aria-pressed="false">Full sky</button><button id="all">Select all</button><button id="none">Clear planets</button></div><div class="toolbar" style="margin-top:5px"><button id="toggleNow" aria-pressed="true">Now line: On</button><button id="jumpNow">Jump to now</button></div><div class="muted" style="font-weight:650;margin:13px 0 4px">Celestial bodies</div>
 <div class="chips" id="selectors"></div>
-<div class="muted" style="font-weight:650;margin:15px 0 5px">Inspect</div><div class="note" id="planetInspector" style="margin:12px 0"><div class="shared-heading"><strong style="color:#8ddbd0">Planet highlight</strong><strong id="planetHighlightName">Hold and slide to inspect</strong></div>
-<input id="planetHighlightSlider" class="shared-slider" type="range" min="0" max="100" value="50" step="1" aria-label="Hold and slide to highlight a selected planet; release to reset" style="touch-action:pan-y;margin-top:12px">
-<div class="shared-picks" id="planetHighlightTicks"></div><div id="planetHighlightDetails" class="muted" style="margin-top:9px" aria-live="polite">Temporarily highlight a selected planet's arc. Release to restore the chart.</div></div>
+<div class="muted" style="font-weight:650;margin:15px 0 5px">Inspect</div><div class="note" id="planetInspector" style="margin:12px 0"><div class="shared-heading"><strong style="color:#8ddbd0">Highlight a planet</strong><button type="button" id="clearPlanetHighlight" class="inspect-clear" hidden>Clear highlight</button></div><p class="muted" style="margin:7px 0 10px">Tap a planet to emphasize its arc. Tap again or clear to return to the full chart.</p><div class="inspect-options" id="planetHighlightTicks" role="group" aria-label="Choose a planet to highlight"></div><div id="planetHighlightDetails" class="muted" style="margin-top:10px" aria-live="polite"></div></div>
 <div class="muted" id="chartcomparison" style="margin:8px 0;color:#8ddbd0">Sun + Moon overlap highlighted on chart</div>
 <div class="chartwrap"><svg id="chart" viewBox="0 0 760 340" tabindex="0" role="img" aria-label="Interactive celestial altitude chart"></svg></div>
 <div class="readout" id="readout" aria-live="polite">Select a time on the chart to inspect celestial positions.</div>
@@ -69,7 +68,7 @@ th{position:sticky;top:0;background:#17253d;z-index:1}th,td{font-variant-numeric
 const $=id=>document.getElementById(id), DEG=180/Math.PI, MS=86400000;
 const bodies=[['Sun','#f4c879'],['Moon','#c9b8ff'],['Mercury','#b9c2cf'],['Venus','#f3d5a4'],['Mars','#ed927a'],['Jupiter','#d7ac8b'],['Saturn','#e3d59e'],['Uranus','#8ddbd0'],['Neptune','#7daaff']];
 const planets=bodies.slice(2).map(x=>x[0]);
-let highlightPlanet=null,highlightDragging=false;
+let highlightPlanet=null;
 let explorerMode='multiple',explorerSelected=new Set(['Venus','Mars','Jupiter']);
 let chartSamples=new Map(),chartDrawScheduled=false;let A,lat=38.415,lon=-82.445,selected=new Set(['Sun','Moon','Venus','Mars','Jupiter','Saturn']),sky='above',cursor=12,showNow=true,days=5,focus='Jupiter',cache=new Map(),dateKey='';
 const fmt=t=>t==null?'—':new Date(t).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
@@ -127,10 +126,26 @@ function outlook(){let [start]=bounds(dateKey),rows=[];for(let i=0;i<days;i++){l
 function phaseView(){let d=day(dateKey),p=moonPhase((d.a+d.b)/2);$('phasename').textContent=p.name;$('illum').textContent=(p.illum*100).toFixed(1)+'%';$('age').textContent=(p.q*29.530588853).toFixed(1)+' d';$('moonicon').textContent=['🌑','🌒','🌓','🌔','🌕','🌖','🌗','🌘'][Math.floor((p.q+1/16)%1*8)]}
 function render(){if(!A)return;dateKey=$('date').value;try{overview();draw();cards();skyMap();outlook();phaseView();explorerUpdate();$('loading').textContent='Calculated locally · '+lat.toFixed(3)+'°, '+lon.toFixed(3)+'°';$('status').textContent='Astronomy Engine ready.'}catch(e){$('loading').textContent='Calculation error: '+e.message;$('loading').classList.add('error');console.error(e)}}
 function highlightChoices(){return planets.filter(b=>selected.has(b))}
-function resetHighlight(){highlightDragging=false;highlightPlanet=null;const slider=$('planetHighlightSlider');slider.value='50';$('planetHighlightName').textContent='Hold and slide to inspect';$('planetHighlightDetails').textContent='Temporarily highlight a selected planet\'s arc. Release to restore the chart.';$('planetInspector').classList.remove('planet-inspector-active');if(A)draw()}
-function updateHighlight(){const choices=highlightChoices(),slider=$('planetHighlightSlider');if(!choices.length){slider.disabled=true;highlightPlanet=null;$('planetHighlightTicks').textContent='Select a planet above to enable inspection';$('planetHighlightName').textContent='No planets selected';$('planetHighlightDetails').textContent='Choose one or more planets in the celestial arcs controls.';return}slider.disabled=false;$('planetHighlightTicks').innerHTML=choices.map(b=>'<span>'+b+'</span>').join('');if(highlightPlanet&&!choices.includes(highlightPlanet))resetHighlight()}
-function inspectHighlight(){const choices=highlightChoices();if(!choices.length)return;let fraction=Number($('planetHighlightSlider').value)/100;let index=Math.min(choices.length-1,Math.floor(fraction*choices.length));highlightPlanet=choices[index];let d=day(dateKey),v=d.items[highlightPlanet],peak=transit(highlightPlanet,d.a,d.b),peakAlt=altitude(highlightPlanet,peak);$('planetHighlightName').textContent=highlightPlanet;$('planetHighlightDetails').textContent='Rise '+fmt(v.rises[0])+' · Peak '+fmt(peak)+' ('+peakAlt.toFixed(1)+'°) · Set '+fmt(v.sets[0]);$('planetInspector').classList.add('planet-inspector-active');draw()}
-function initHighlight(){const slider=$('planetHighlightSlider');slider.addEventListener('pointerdown',e=>{if(slider.disabled)return;highlightDragging=true;try{slider.setPointerCapture(e.pointerId)}catch(_){};inspectHighlight()});slider.addEventListener('input',()=>{if(highlightDragging)inspectHighlight()});slider.addEventListener('pointerup',resetHighlight);slider.addEventListener('pointercancel',resetHighlight);slider.addEventListener('lostpointercapture',()=>{if(highlightDragging)resetHighlight()});slider.addEventListener('keyup',e=>{if(['ArrowLeft','ArrowRight','Home','End','PageUp','PageDown'].includes(e.key))resetHighlight()});slider.addEventListener('keydown',e=>{if(['ArrowLeft','ArrowRight','Home','End','PageUp','PageDown'].includes(e.key)){highlightDragging=true;queueMicrotask(()=>{if(highlightDragging)inspectHighlight()})}});slider.addEventListener('blur',()=>{if(highlightDragging)resetHighlight()});updateHighlight()}
+function resetHighlight(){highlightPlanet=null;updateHighlight();if(A)draw()}
+function updateHighlight(){
+ const choices=highlightChoices(),box=$('planetHighlightTicks');
+ if(highlightPlanet&&!choices.includes(highlightPlanet))highlightPlanet=null;
+ box.replaceChildren();
+ for(const body of choices){
+  const button=document.createElement('button');button.type='button';button.className='inspect-choice';
+  button.textContent=body;button.style.setProperty('--planet-color',col(body));
+  button.setAttribute('aria-pressed',String(highlightPlanet===body));
+  button.onclick=()=>{highlightPlanet=highlightPlanet===body?null:body;updateHighlight();if(A)draw()};
+  box.append(button);
+ }
+ if(!choices.length){box.textContent='Select a planet above to enable inspection.'}
+ $('clearPlanetHighlight').hidden=!highlightPlanet;
+ $('planetInspector').classList.toggle('planet-inspector-active',!!highlightPlanet);
+ if(!highlightPlanet){$('planetHighlightDetails').textContent=choices.length?'All selected celestial arcs are visible.':'Choose one or more planets above.';return}
+ const d=day(dateKey),v=d.items[highlightPlanet],peak=transit(highlightPlanet,d.a,d.b),peakAlt=altitude(highlightPlanet,peak);
+ $('planetHighlightDetails').textContent=highlightPlanet+' · Rise '+fmt(v.rises[0])+' · Peak '+fmt(peak)+' ('+peakAlt.toFixed(1)+'°) · Set '+fmt(v.sets[0]);
+}
+function initHighlight(){$('clearPlanetHighlight').onclick=resetHighlight;updateHighlight()}
 function selectors(){$('selectors').innerHTML=bodies.map(([b,c])=>'<label><input type="checkbox" data-body="'+b+'" '+(selected.has(b)?'checked':'')+'><span class="dot" style="background:'+c+'"></span>'+b+'</label>').join('');$('selectors').querySelectorAll('input').forEach(el=>el.onchange=()=>{el.checked?selected.add(el.dataset.body):selected.delete(el.dataset.body);updateHighlight();overview();draw();skyMap()})}
 $('sharedslider').oninput=sharedView;
 $('toggleNow').onclick=()=>{showNow=!showNow;$('toggleNow').setAttribute('aria-pressed',String(showNow));$('toggleNow').textContent='Now line: '+(showNow?'On':'Off');draw()};
