@@ -32,14 +32,19 @@ th{position:sticky;top:0;background:#17253d;z-index:1}th,td{font-variant-numeric
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition-duration:0s!important;animation-duration:0s!important}}
 .inspect-options{display:flex;flex-wrap:wrap;gap:8px}.inspect-choice{min-height:40px;border-radius:22px;padding:8px 14px;border:1px solid #4b607c;background:#17253d;color:#edf3ff;font-size:13px;cursor:pointer}.inspect-choice[aria-pressed="true"]{background:#284b59;border-color:var(--planet-color);box-shadow:inset 0 0 0 1px var(--planet-color)}.inspect-choice:focus-visible,.inspect-clear:focus-visible{outline:2px solid #8ddbd0;outline-offset:2px}.inspect-clear{min-height:36px;font-size:12px;padding:6px 10px}.inspect-clear[hidden]{display:none!important}
 /* Observatory 3.0: mobile controls */.inspect-choice,.inspect-clear{min-height:44px}.planetcard .muted{overflow-wrap:anywhere}@media(max-width:600px){.toolbar button{min-height:44px}.panel{overflow-wrap:anywhere}}
+
+/* Accessible touch-first section reordering */
+.layout-toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:8px 3px 12px}.layout-toolbar button{font-size:12px;min-height:40px}.panel>details>summary{position:relative;padding-right:48px}.section-grip{position:absolute;right:0;top:0;display:grid;place-items:center;width:44px;height:44px;border:1px solid #455c74;border-radius:10px;background:#243851;color:#b9d4e3;touch-action:none;cursor:grab;font-size:23px;line-height:1;user-select:none}.section-grip:active{cursor:grabbing}.section-grip:focus-visible{outline:2px solid #8ddbd0;outline-offset:2px}.panel.is-dragging{border-color:#8ddbd0;box-shadow:0 10px 30px rgba(0,0,0,.3);opacity:.88}.panel.is-dragging .body{display:none}.panel.drop-before{box-shadow:0 -4px 0 #8ddbd0}.panel.drop-after{box-shadow:0 4px 0 #8ddbd0}@media(max-width:600px){.layout-toolbar{align-items:flex-start}.layout-toolbar .muted{max-width:65%}}
 </style></head><body><main>
 <header><div><div class="eyebrow">CELESTIAL RHYTHMS · PLANETARY EPHEMERIDES</div><h1>Solar System Observatory</h1><div class="muted" id="place">Huntington, West Virginia · 38.415° N, 82.445° W</div></div><div style="font-size:30px" aria-hidden="true">☀️ 🪐 ☾</div></header>
 <div class="controls"><input id="date" type="date" aria-label="Observation date"><button id="today">Today</button><button id="gps">Use GPS</button><button id="coords">Coordinates</button></div>
 <div id="loading" class="muted" role="status">Loading astronomy engine…</div>
-<section class="panel"><details open id="fold-daily"><summary><h2>Daily overview</h2></summary><div class="body"><p class="muted">Rise, peak altitude time, set, and time above the horizon for your selected bodies.</p>
+<div id="layoutToolbar" class="layout-toolbar"><span class="muted">Customize section order using the drag handles.</span><button id="resetLayout" type="button">Reset layout</button></div>
+<div id="sectionLayout" aria-label="Reorderable observatory sections">
+<section class="panel" data-section-id="section-0"><details open id="fold-daily"><summary><h2>Daily overview</h2></summary><div class="body"><p class="muted">Rise, peak altitude time, set, and time above the horizon for your selected bodies.</p>
 <div class="scroll"><table><thead><tr><th>Body</th><th>Rise</th><th>Peak altitude</th><th>Set</th><th>Sky time</th></tr></thead><tbody id="daily"></tbody></table></div>
 </div></details></section>
-<section class="panel"><details open><summary><h2>24-hour celestial arcs</h2></summary><div class="body">
+<section class="panel" data-section-id="section-1"><details open><summary><h2>24-hour celestial arcs</h2></summary><div class="body">
 <p class="muted">Compare celestial altitude throughout the day. Drag the chart to inspect any time.</p><div class="muted" style="font-weight:650;margin:12px 0 5px">View</div>
 <div class="toolbar"><button id="above" aria-pressed="true">Above horizon</button><button id="full" aria-pressed="false">Full sky</button><button id="all">Select all</button><button id="none">Clear planets</button></div><div class="toolbar" style="margin-top:5px"><button id="toggleNow" aria-pressed="true">Now line: On</button><button id="jumpNow">Jump to now</button></div><div class="muted" style="font-weight:650;margin:13px 0 4px">Celestial bodies</div>
 <div class="chips" id="selectors"></div>
@@ -49,9 +54,9 @@ th{position:sticky;top:0;background:#17253d;z-index:1}th,td{font-variant-numeric
 <div class="readout" id="readout" aria-live="polite">Select a time on the chart to inspect celestial positions.</div>
 <div class="note" style="margin-top:12px"><div class="shared-heading"><strong id="sharedtitle" style="color:#8ddbd0">☀ + ☾ Shared sky</strong><strong id="shared" style="font-size:20px">—</strong></div><p class="muted">Compare simultaneous above-horizon time with the Sun.</p><label for="sharedslider" class="muted">Compare with Sun: <strong id="sharedname">Moon</strong></label><input id="sharedslider" class="shared-slider" type="range" min="0" max="7" step="1" value="0" aria-label="Choose Moon or planet to compare shared sky time with the Sun"><div id="sharedticks" class="shared-picks"></div><div id="sharedwindows" class="muted" style="margin-top:12px"></div><div id="sharedsummary" class="muted" style="margin-top:6px"></div></div>
 </div></details></section>
-<section class="panel"><details open><summary><h2>Outlook</h2></summary><div class="body"><div class="toolbar"><button data-days="5" aria-pressed="true">5 days</button><button data-days="10" aria-pressed="false">10 days</button><button data-days="30" aria-pressed="false">30 days</button></div><p class="muted">Choose a day to inspect its full planetary chart. Outlook focuses on rise and set times for the Sun, Moon, and selected planet.</p><div class="toolbar"><label for="focus">Planet</label><select id="focus" style="background:#263852;color:#edf3ff;border:1px solid #4b607c;border-radius:9px;padding:9px"></select></div><div class="scroll"><table><thead><tr><th>Date</th><th>Sunrise</th><th>Sunset</th><th>Moonrise</th><th>Moonset</th><th id="focushead">Planet rise</th><th>Set</th></tr></thead><tbody id="outlook"></tbody></table></div></div></details></section>
+<section class="panel" data-section-id="section-2"><details open><summary><h2>Outlook</h2></summary><div class="body"><div class="toolbar"><button data-days="5" aria-pressed="true">5 days</button><button data-days="10" aria-pressed="false">10 days</button><button data-days="30" aria-pressed="false">30 days</button></div><p class="muted">Choose a day to inspect its full planetary chart. Outlook focuses on rise and set times for the Sun, Moon, and selected planet.</p><div class="toolbar"><label for="focus">Planet</label><select id="focus" style="background:#263852;color:#edf3ff;border:1px solid #4b607c;border-radius:9px;padding:9px"></select></div><div class="scroll"><table><thead><tr><th>Date</th><th>Sunrise</th><th>Sunset</th><th>Moonrise</th><th>Moonset</th><th id="focushead">Planet rise</th><th>Set</th></tr></thead><tbody id="outlook"></tbody></table></div></div></details></section>
 
-<section class="panel"><details open id="fold-explorer"><summary><h2>Shared Sky Explorer</h2></summary><div class="body"><p class="muted">Discover when any combination of planets, the Moon, and the Sun share the sky. An overlap means all selected bodies are simultaneously above the horizon; it does not guarantee naked-eye visibility.</p>
+<section class="panel" data-section-id="section-3"><details open id="fold-explorer"><summary><h2>Shared Sky Explorer</h2></summary><div class="body"><p class="muted">Discover when any combination of planets, the Moon, and the Sun share the sky. An overlap means all selected bodies are simultaneously above the horizon; it does not guarantee naked-eye visibility.</p>
 <div class="toolbar" id="explorerModes"><button data-explore="pair" aria-pressed="false">Two bodies</button><button data-explore="multiple" aria-pressed="true">Multiple bodies</button><button data-explore="maximum" aria-pressed="false">Maximum overlap</button></div>
 <div id="explorerSelection"><div class="chips" id="explorerChips"></div><p class="muted" id="explorerHint">Choose at least two bodies.</p></div>
 <div class="note"><div class="shared-heading"><strong id="explorerTitle" style="color:#8ddbd0">Multi-body shared sky</strong><strong id="explorerDuration" style="font-size:20px">—</strong></div><div id="explorerResult" class="muted" style="margin-top:10px"></div></div>
@@ -59,10 +64,11 @@ th{position:sticky;top:0;background:#17253d;z-index:1}th,td{font-variant-numeric
 <div id="explorerWindows" class="muted" style="margin-top:10px"></div>
 <div id="explorerRanking" class="scroll" style="margin-top:14px"></div>
 </div></details></section>
-<section class="panel"><details open id="fold-horizon"><summary><h2>Interactive horizon sky</h2></summary><div class="body"><p class="muted">Overhead view at the selected chart time. North is up, the outer circle is the horizon, and the center is directly overhead. Select a marker for its coordinates.</p><div class="sky-layout"><svg id="skymap" class="sky-map" viewBox="0 0 420 420" role="img" tabindex="0" aria-label="Interactive sky map"></svg><div><div class="readout" id="skyreadout" aria-live="polite">Select a body.</div><div class="sky-key" id="skykey"></div><p class="muted">Only objects above the geometric horizon are plotted. Apparent sizes are illustrative. Daylight can obscure planets.</p></div></div></div></details></section>
-<section class="panel"><details open><summary><h2>Planetary visibility</h2></summary><div class="body"><p class="muted">Geometric horizon status at the selected time. Being above the horizon does not guarantee naked-eye visibility.</p><div class="cards" id="cards"></div></div></details></section>
+<section class="panel" data-section-id="section-4"><details open id="fold-horizon"><summary><h2>Interactive horizon sky</h2></summary><div class="body"><p class="muted">Overhead view at the selected chart time. North is up, the outer circle is the horizon, and the center is directly overhead. Select a marker for its coordinates.</p><div class="sky-layout"><svg id="skymap" class="sky-map" viewBox="0 0 420 420" role="img" tabindex="0" aria-label="Interactive sky map"></svg><div><div class="readout" id="skyreadout" aria-live="polite">Select a body.</div><div class="sky-key" id="skykey"></div><p class="muted">Only objects above the geometric horizon are plotted. Apparent sizes are illustrative. Daylight can obscure planets.</p></div></div></div></details></section>
+<section class="panel" data-section-id="section-5"><details open><summary><h2>Planetary visibility</h2></summary><div class="body"><p class="muted">Geometric horizon status at the selected time. Being above the horizon does not guarantee naked-eye visibility.</p><div class="cards" id="cards"></div></div></details></section>
 
-<section class="panel"><details open><summary><h2>Moon phase</h2></summary><div class="body"><div class="phase"><div class="moonicon" id="moonicon" aria-hidden="true">🌙</div><div><strong id="phasename" style="font-size:23px">—</strong><div class="muted">Geocentric illuminated fraction, at local noon</div></div></div><div class="stats"><div class="stat">Illumination<strong id="illum">—</strong></div><div class="stat">Moon age<strong id="age">—</strong></div><div class="stat">Synodic cycle<strong>29.53 d</strong></div></div></div></details></section>
+<section class="panel" data-section-id="section-6"><details open><summary><h2>Moon phase</h2></summary><div class="body"><div class="phase"><div class="moonicon" id="moonicon" aria-hidden="true">🌙</div><div><strong id="phasename" style="font-size:23px">—</strong><div class="muted">Geocentric illuminated fraction, at local noon</div></div></div><div class="stats"><div class="stat">Illumination<strong id="illum">—</strong></div><div class="stat">Moon age<strong id="age">—</strong></div><div class="stat">Synodic cycle<strong>29.53 d</strong></div></div></div></details></section>
+</div>
 <footer><strong>Data and accuracy</strong><p>Planetary and lunar positions are calculated locally with Astronomy Engine (VSOP87/ELP-based analytical astronomy). This is not a live telescope feed. Rise/set calculations use geometric altitude crossing at 0°, except the Sun, which uses −0.833° to approximate the visible solar limb and refraction. Results are approximate and can differ from observed times due to terrain, elevation, weather, and atmospheric refraction. Times are shown in the browser's local time zone, not automatically the time zone of manually entered coordinates. An internet connection is needed to load the astronomy library. Do not use for navigation or safety-critical decisions.</p><div id="status"></div></footer>
 </main>
 <script type="module">
@@ -71,8 +77,8 @@ const bodies=[['Sun','#f4c879'],['Moon','#c9b8ff'],['Mercury','#b9c2cf'],['Venus
 const planets=bodies.slice(2).map(x=>x[0]);
 let highlightPlanet=null;
 const prefsKey='solar-observatory-v3';
-function savePrefs(){try{localStorage.setItem(prefsKey,JSON.stringify({selected:[...selected],sky,showNow,days,focus,folds:[...document.querySelectorAll('.panel > details')].map(d=>d.open)}))}catch{}}
-function restorePrefs(){try{const p=JSON.parse(localStorage.getItem(prefsKey)||'{}');if(Array.isArray(p.selected))selected=new Set(p.selected.filter(b=>bodies.some(([n])=>n===b)));if(['above','full'].includes(p.sky))sky=p.sky;if(typeof p.showNow==='boolean')showNow=p.showNow;if([5,10,30].includes(p.days))days=p.days;if(planets.includes(p.focus))focus=p.focus;if(Array.isArray(p.folds))document.querySelectorAll('.panel > details').forEach((d,i)=>{if(typeof p.folds[i]==='boolean')d.open=p.folds[i]})}catch{}document.querySelectorAll('.panel > details').forEach(d=>d.addEventListener('toggle',savePrefs));$('above').setAttribute('aria-pressed',String(sky==='above'));$('full').setAttribute('aria-pressed',String(sky==='full'));$('toggleNow').setAttribute('aria-pressed',String(showNow));$('toggleNow').textContent='Now line: '+(showNow?'On':'Off');document.querySelectorAll('[data-days]').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.days)===days)))}
+function savePrefs(){try{localStorage.setItem(prefsKey,JSON.stringify({selected:[...selected],sky,showNow,days,focus,folds:Object.fromEntries([...document.querySelectorAll('#sectionLayout > .panel')].map(p=>[p.dataset.sectionId,p.querySelector('details').open])),order:[...document.querySelectorAll('#sectionLayout > .panel')].map(p=>p.dataset.sectionId)}))}catch{}}
+function restorePrefs(){try{const p=JSON.parse(localStorage.getItem(prefsKey)||'{}');if(Array.isArray(p.selected))selected=new Set(p.selected.filter(b=>bodies.some(([n])=>n===b)));if(['above','full'].includes(p.sky))sky=p.sky;if(typeof p.showNow==='boolean')showNow=p.showNow;if([5,10,30].includes(p.days))days=p.days;if(planets.includes(p.focus))focus=p.focus;if(p.folds&&typeof p.folds==='object')document.querySelectorAll('#sectionLayout > .panel').forEach((panel,i)=>{const v=Array.isArray(p.folds)?p.folds[i]:p.folds[panel.dataset.sectionId];if(typeof v==='boolean')panel.querySelector('details').open=v});if(Array.isArray(p.order)){const layout=$('sectionLayout');const sections=new Map([...layout.children].map(p=>[p.dataset.sectionId,p]));for(const id of p.order){if(sections.has(id))layout.append(sections.get(id))}}}catch{}document.querySelectorAll('.panel > details').forEach(d=>d.addEventListener('toggle',savePrefs));$('above').setAttribute('aria-pressed',String(sky==='above'));$('full').setAttribute('aria-pressed',String(sky==='full'));$('toggleNow').setAttribute('aria-pressed',String(showNow));$('toggleNow').textContent='Now line: '+(showNow?'On':'Off');document.querySelectorAll('[data-days]').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.days)===days)))}
 let explorerMode='multiple',explorerSelected=new Set(['Venus','Mars','Jupiter']);
 let chartSamples=new Map(),chartDrawScheduled=false,skyUpdateScheduled=false;let A,lat=38.415,lon=-82.445,selected=new Set(['Sun','Moon','Venus','Mars','Jupiter','Saturn']),sky='above',cursor=12,showNow=true,days=5,focus='Jupiter',cache=new Map(),dateKey='';
 const fmt=t=>t==null?'—':new Date(t).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
@@ -153,6 +159,71 @@ function updateHighlight(){
  $('planetHighlightDetails').textContent=highlightPlanet+' · Rise '+rise+' · Peak '+fmt(peak)+' ('+peakAlt.toFixed(1)+'°) · Set '+set;
 }
 function initHighlight(){$('clearPlanetHighlight').onclick=resetHighlight;updateHighlight()}
+
+// Pointer and keyboard section reordering. Only the handle starts a drag;
+// ordinary scrolling, chart gestures and disclosure summaries remain untouched.
+function initSectionReorder(){
+ const layout=$('sectionLayout'),sections=[...layout.children];
+ let drag=null,target=null,after=false,starting=null;
+ const clearTarget=()=>{for(const p of layout.children)p.classList.remove('drop-before','drop-after');target=null};
+ const finish=commit=>{
+   if(!drag)return;
+   const panel=drag.panel;clearTimeout(drag.timer);clearTarget();
+   if(commit&&drag.active&&drag.destination&&drag.destination!==panel){
+     const anchor=drag.after?drag.destination.nextSibling:drag.destination;
+     layout.insertBefore(panel,anchor);savePrefs();
+   }
+   panel.classList.remove('is-dragging');document.body.style.userSelect='';
+   drag=null;
+ };
+ const pick=(y)=>{
+   clearTarget();const options=[...layout.children].filter(p=>p!==drag.panel);
+   if(!options.length)return;
+   let nearest=options[0],distance=Infinity;
+   for(const p of options){const r=p.getBoundingClientRect(),d=Math.abs(y-(r.top+r.bottom)/2);if(d<distance){nearest=p;distance=d}}
+   const rect=nearest.getBoundingClientRect();target=nearest;after=y>(rect.top+rect.bottom)/2;
+   nearest.classList.add(after?'drop-after':'drop-before');
+   drag.destination=nearest;drag.after=after;
+ };
+ const move=e=>{
+   if(!drag||e.pointerId!==drag.id)return;
+   if(!drag.active){if(Math.abs(e.clientY-drag.startY)>9){clearTimeout(drag.timer);drag.timer=null;drag.active=true;drag.panel.classList.add('is-dragging');document.body.style.userSelect='none'}else return}
+   e.preventDefault();pick(e.clientY);
+   if(e.clientY<65)window.scrollBy(0,-18);else if(e.clientY>innerHeight-65)window.scrollBy(0,18);
+ };
+ const end=e=>{if(drag&&e.pointerId===drag.id)finish(true)};
+ const cancel=e=>{if(drag&&e.pointerId===drag.id)finish(false)};
+ document.addEventListener('pointermove',move,{passive:false});
+ document.addEventListener('pointerup',end);
+ document.addEventListener('pointercancel',cancel);
+ for(const panel of sections){
+   const summary=panel.querySelector('summary'),title=summary.querySelector('h2').textContent;
+   const handle=document.createElement('button');
+   handle.type='button';handle.className='section-grip';handle.textContent='⠿';
+   handle.setAttribute('aria-label','Move '+title+'. Use arrow keys to reorder');
+   handle.title='Hold and drag to move; arrow keys also work';
+   handle.addEventListener('click',e=>{e.preventDefault();e.stopPropagation()});
+   handle.addEventListener('pointerdown',e=>{
+     if(e.button!==0||drag)return;
+     e.preventDefault();e.stopPropagation();
+     drag={panel,id:e.pointerId,startY:e.clientY,active:false,destination:null,after:false,timer:null};
+     drag.timer=setTimeout(()=>{if(drag&&drag.panel===panel){drag.active=true;panel.classList.add('is-dragging');document.body.style.userSelect='none'}},240);
+   });
+   handle.addEventListener('keydown',e=>{
+     if(!['ArrowUp','ArrowDown'].includes(e.key))return;
+     e.preventDefault();e.stopPropagation();
+     const sibling=e.key==='ArrowUp'?panel.previousElementSibling:panel.nextElementSibling;
+     if(!sibling)return;
+     if(e.key==='ArrowUp')layout.insertBefore(panel,sibling);else layout.insertBefore(sibling,panel);
+     handle.focus();savePrefs();
+   });
+   summary.append(handle);
+ }
+ $('resetLayout').onclick=()=>{
+   finish(false);for(const panel of sections)layout.append(panel);savePrefs();
+ };
+}
+
 function selectors(){$('selectors').innerHTML=bodies.map(([b,c])=>'<label><input type="checkbox" data-body="'+b+'" '+(selected.has(b)?'checked':'')+'><span class="dot" style="background:'+c+'"></span>'+b+'</label>').join('');$('selectors').querySelectorAll('input').forEach(el=>el.onchange=()=>{el.checked?selected.add(el.dataset.body):selected.delete(el.dataset.body);updateHighlight();overview();draw();skyMap();savePrefs()})}
 $('sharedslider').oninput=()=>{sharedView();scheduleChartDraw()};
 $('toggleNow').onclick=()=>{showNow=!showNow;$('toggleNow').setAttribute('aria-pressed',String(showNow));$('toggleNow').textContent='Now line: '+(showNow?'On':'Off');draw();savePrefs()};
@@ -167,6 +238,6 @@ $('all').onclick=()=>{selected=new Set(bodies.map(x=>x[0]));selectors();updateHi
 $('none').onclick=()=>{selected=new Set(['Sun','Moon']);selectors();updateHighlight();overview();draw();skyMap();savePrefs()};
 for(let btn of document.querySelectorAll('[data-days]'))btn.onclick=()=>{days=Number(btn.dataset.days);document.querySelectorAll('[data-days]').forEach(x=>x.setAttribute('aria-pressed',String(x===btn)));outlook();savePrefs()};
 $('focus').innerHTML=planets.map(b=>'<option '+(b===focus?'selected':'')+'>'+b+'</option>').join('');$('focus').onchange=()=>{focus=$('focus').value;outlook();savePrefs()};
-restorePrefs();selectors();initHighlight();explorerInit();
+restorePrefs();initSectionReorder();selectors();initHighlight();explorerInit();
 try{A=await import('https://cdn.jsdelivr.net/npm/astronomy-engine@2/+esm');render()}catch(e){$('loading').textContent='Astronomy engine could not load. Check internet access or CDN availability.';$('loading').classList.add('error');$('status').textContent=String(e)}
 </script></body></html>
