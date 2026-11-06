@@ -182,6 +182,25 @@ $('all').onclick=()=>{selected=new Set(bodies.map(x=>x[0]));selectors();updateHi
 $('none').onclick=()=>{selected=new Set(['Sun','Moon']);selectors();updateHighlight();overview();draw();skyMap();savePrefs()};
 for(let btn of document.querySelectorAll('[data-days]'))btn.onclick=()=>{days=Number(btn.dataset.days);document.querySelectorAll('[data-days]').forEach(x=>x.setAttribute('aria-pressed',String(x===btn)));outlook();savePrefs()};
 $('focus').innerHTML=planets.map(b=>'<option '+(b===focus?'selected':'')+'>'+b+'</option>').join('');$('focus').onchange=()=>{focus=$('focus').value;outlook();savePrefs()};
-restorePrefs();initSectionReorder();selectors();initHighlight();explorerInit();
-try{A=await import('https://cdn.jsdelivr.net/npm/astronomy-engine@2/+esm');render()}catch(e){$('loading').textContent='Astronomy engine could not load. Check internet access or CDN availability.';$('loading').classList.add('error');$('status').textContent=String(e)}
+async function bootObservatory(){
+ try{
+   restorePrefs();initSectionReorder();selectors();initHighlight();explorerInit();
+ }catch(error){
+   $('loading').textContent='Interface initialization failed: '+(error?.message||String(error));
+   $('loading').classList.add('error');
+   console.error('Observatory initialization',error);
+   return;
+ }
+ const sources=['https://cdn.jsdelivr.net/npm/astronomy-engine@2/+esm','https://esm.sh/astronomy-engine@2'];
+ for(const url of sources){
+   try{
+     A=await Promise.race([import(url),new Promise((_,reject)=>setTimeout(()=>reject(new Error('Library request timed out')),12000))]);
+     render();return;
+   }catch(error){console.warn('Astronomy source unavailable:',url,error)}
+ }
+ $('loading').textContent='Astronomy data could not load. Check your connection and refresh.';
+ $('loading').classList.add('error');
+ $('status').textContent='Both astronomy library sources were unavailable.';
+}
+bootObservatory();
 </script></body></html>
