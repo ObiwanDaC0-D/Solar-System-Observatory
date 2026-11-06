@@ -8,7 +8,7 @@
 <div id="loading" class="muted" role="status">Loading astronomy engine…</div>
 <section class="panel"><details open><summary><h2>24-hour celestial arcs</h2></summary><div class="body">
 <p class="muted">Altitude relative to the geometric horizon, in local time. Select bodies to compare their paths. The plotted horizon does not account for buildings, hills, or atmospheric refraction.</p>
-<div class="toolbar"><button id="above" aria-pressed="true">Above horizon</button><button id="full" aria-pressed="false">Full sky</button><button id="all">Select all</button><button id="none">Clear planets</button></div>
+<div class="toolbar"><button id="above" aria-pressed="true">Above horizon</button><button id="full" aria-pressed="false">Full sky</button><button id="all">Select all</button><button id="none">Clear planets</button><button id="toggleNow" aria-pressed="true">Now line: On</button><button id="jumpNow">Jump to now</button></div>
 <div class="chips" id="selectors"></div>
 <div class="chartwrap"><svg id="chart" viewBox="0 0 760 340" tabindex="0" role="img" aria-label="Interactive celestial altitude chart"></svg></div>
 <div class="readout" id="readout" aria-live="polite">Select a time on the chart to inspect celestial positions.</div>
@@ -26,7 +26,7 @@
 const $=id=>document.getElementById(id), DEG=180/Math.PI, MS=86400000;
 const bodies=[['Sun','#f4c879'],['Moon','#c9b8ff'],['Mercury','#b9c2cf'],['Venus','#f3d5a4'],['Mars','#ed927a'],['Jupiter','#d7ac8b'],['Saturn','#e3d59e'],['Uranus','#8ddbd0'],['Neptune','#7daaff']];
 const planets=bodies.slice(2).map(x=>x[0]);
-let A,lat=38.415,lon=-82.445,selected=new Set(['Sun','Moon','Venus','Mars','Jupiter','Saturn']),sky='above',cursor=12,days=5,focus='Jupiter',cache=new Map(),dateKey='';
+let A,lat=38.415,lon=-82.445,selected=new Set(['Sun','Moon','Venus','Mars','Jupiter','Saturn']),sky='above',cursor=12,showNow=true,days=5,focus='Jupiter',cache=new Map(),dateKey='';
 const fmt=t=>t==null?'—':new Date(t).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
 const dur=ms=>{let m=Math.max(0,Math.round(ms/60000));return Math.floor(m/60)+'h '+String(m%60).padStart(2,'0')+'m'};
 const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
@@ -47,6 +47,7 @@ for(let deg=Math.ceil(min/30)*30;deg<=max;deg+=30){let yy=y(deg);svgEl('line',{x
 for(let h=0;h<=24;h+=3){let t=d.a+(d.b-d.a)*h/24,xx=x(t);svgEl('line',{x1:xx,x2:xx,y1:T,y2:T+H,stroke:'#2b3e57'},chart);svgEl('text',{x:xx,y:316,'text-anchor':'middle',fill:'#a9bad1','font-size':12},chart,fmt(t).replace(':00',''))}
 let defs=svgEl('defs',{},chart),clip=svgEl('clipPath',{id:'plotclip'},defs);svgEl('rect',{x:L,y:T,width:W,height:H},clip);let group=svgEl('g',{'clip-path':'url(#plotclip)'},chart);
 for(let [body,color] of bodies){if(!selected.has(body))continue;let path='';for(let i=0;i<=192;i++){let t=d.a+(d.b-d.a)*i/192,v=altitude(body,t);path+=(i?'L':'M')+x(t).toFixed(2)+' '+y(v).toFixed(2)+' '};svgEl('path',{d:path,fill:'none',stroke:color,'stroke-width':body==='Sun'?3:2.2,'stroke-linecap':'round'},group)}
+const now=Date.now();if(showNow&&now>=d.a&&now<d.b){let nx=x(now);svgEl('line',{x1:nx,x2:nx,y1:T,y2:T+H,stroke:'#8ddbd0','stroke-width':2.5,'stroke-dasharray':'6 4'},chart);let labelX=Math.max(L+19,Math.min(L+W-19,nx));svgEl('rect',{x:labelX-19,y:T+2,width:38,height:18,rx:5,fill:'#8ddbd0'},chart);svgEl('text',{x:labelX,y:T+15,'text-anchor':'middle',fill:'#0b1628','font-size':11,'font-weight':700},chart,'NOW')}
 let inspect=d.a+(d.b-d.a)*cursor/24,xx=x(inspect);svgEl('line',{x1:xx,x2:xx,y1:T,y2:T+H,stroke:'#ffffff','stroke-dasharray':'4 5',opacity:.65},chart);
 for(let [body,color] of bodies)if(selected.has(body)){let v=altitude(body,inspect);if(v>=min&&v<=max)svgEl('circle',{cx:xx,cy:y(v),r:4,fill:color,stroke:'#0b1628','stroke-width':1.5},chart)}
 let vals=bodies.filter(x=>selected.has(x[0])).map(([b])=>'<span style="color:'+col(b)+'">'+b+' '+altitude(b,inspect).toFixed(1)+'°</span>').join(' · ');
@@ -61,6 +62,9 @@ function outlook(){let [start]=bounds(dateKey),rows=[];for(let i=0;i<days;i++){l
 function phaseView(){let d=day(dateKey),p=moonPhase((d.a+d.b)/2);$('phasename').textContent=p.name;$('illum').textContent=(p.illum*100).toFixed(1)+'%';$('age').textContent=(p.q*29.530588853).toFixed(1)+' d';$('moonicon').textContent=['🌑','🌒','🌓','🌔','🌕','🌖','🌗','🌘'][Math.floor((p.q+1/16)%1*8)]}
 function render(){if(!A)return;dateKey=$('date').value;try{overview();draw();cards();skyMap();outlook();phaseView();$('loading').textContent='Calculated locally · '+lat.toFixed(3)+'°, '+lon.toFixed(3)+'°';$('status').textContent='Astronomy Engine ready.'}catch(e){$('loading').textContent='Calculation error: '+e.message;$('loading').classList.add('error');console.error(e)}}
 function selectors(){$('selectors').innerHTML=bodies.map(([b,c])=>'<label><input type="checkbox" data-body="'+b+'" '+(selected.has(b)?'checked':'')+'><span class="dot" style="background:'+c+'"></span>'+b+'</label>').join('');$('selectors').querySelectorAll('input').forEach(el=>el.onchange=()=>{el.checked?selected.add(el.dataset.body):selected.delete(el.dataset.body);draw();skyMap()})}
+$('toggleNow').onclick=()=>{showNow=!showNow;$('toggleNow').setAttribute('aria-pressed',String(showNow));$('toggleNow').textContent='Now line: '+(showNow?'On':'Off');draw()};
+$('jumpNow').onclick=()=>{let now=new Date();$('date').value=iso(now);let [a,b]=bounds(iso(now));cursor=(now.getTime()-a)/(b-a)*24;render()};
+setInterval(()=>{if(A&&showNow&&dateKey===iso(new Date()))draw()},60000);
 $('date').value=iso(new Date());$('today').onclick=()=>{$('date').value=iso(new Date());render()};$('date').onchange=render;
 $('gps').onclick=()=>{if(!navigator.geolocation){alert('Geolocation is unavailable.');return}navigator.geolocation.getCurrentPosition(p=>{lat=p.coords.latitude;lon=p.coords.longitude;cache.clear();$('place').textContent=lat.toFixed(4)+'°, '+lon.toFixed(4)+'° · GPS';render()},e=>alert('Location unavailable: '+e.message),{enableHighAccuracy:false,timeout:12000})};
 $('coords').onclick=()=>{let s=prompt('Latitude, longitude (decimal degrees)',lat+', '+lon);if(s===null)return;let v=s.split(',').map(Number);if(v.length!==2||!v.every(Number.isFinite)||Math.abs(v[0])>90||Math.abs(v[1])>180){alert('Enter valid latitude and longitude, separated by a comma.');return}lat=v[0];lon=v[1];cache.clear();$('place').textContent=lat.toFixed(4)+'°, '+lon.toFixed(4)+'° · manual coordinates';render()};
