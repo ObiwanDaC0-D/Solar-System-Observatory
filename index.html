@@ -53,6 +53,9 @@ th{position:sticky;top:0;background:#17253d;z-index:1}th,td{font-variant-numeric
 <p class="muted">Compare celestial altitude throughout the day. Drag the chart to inspect any time.</p><div class="muted" style="font-weight:650;margin:12px 0 5px">View</div>
 <div class="toolbar"><button id="above" aria-pressed="true">Above horizon</button><button id="full" aria-pressed="false">Full sky</button><button id="all">Select all</button><button id="none">Clear planets</button></div><div class="toolbar" style="margin-top:5px"><button id="toggleNow" aria-pressed="true">Now line: On</button><button id="jumpNow">Jump to now</button></div><div class="muted" style="font-weight:650;margin:13px 0 4px">Celestial bodies</div>
 <div class="chips" id="selectors"></div>
+<div class="muted" id="chartcomparison" style="margin:8px 0;color:#8ddbd0"></div>
+<div class="chartwrap"><svg id="chart" viewBox="0 0 760 340" tabindex="0" role="img" aria-label="Interactive celestial altitude chart"></svg></div>
+<div class="readout" id="readout" aria-live="polite">Select a time on the chart to inspect celestial positions.</div>
 <details class="note inspect-disclosure" id="planetInspector" open style="margin:15px 0 12px">
 <summary class="inspect-summary"><strong style="color:#8ddbd0">Inspect</strong></summary>
 <div class="inspect-content"><button type="button" id="clearPlanetHighlight" class="inspect-clear" hidden>Clear selection</button>
@@ -62,9 +65,7 @@ th{position:sticky;top:0;background:#17253d;z-index:1}th,td{font-variant-numeric
 <div id="planetHighlightDetails" class="muted" style="margin-top:10px" aria-live="polite"></div>
 <div id="inspectSharedResults" hidden><div class="shared-heading" style="margin-top:10px"><strong id="sharedtitle" style="color:#8ddbd0">Sun + Moon shared sky</strong><strong id="shared" style="font-size:20px">—</strong></div><div id="sharedwindows" class="muted" style="margin-top:8px"></div><div id="sharedsummary" class="muted" style="margin-top:6px"></div></div>
 </div></details>
-<div class="muted" id="chartcomparison" style="margin:8px 0;color:#8ddbd0"></div>
-<div class="chartwrap"><svg id="chart" viewBox="0 0 760 340" tabindex="0" role="img" aria-label="Interactive celestial altitude chart"></svg></div>
-<div class="readout" id="readout" aria-live="polite">Select a time on the chart to inspect celestial positions.</div>
+
 
 </div></details></section>
 <section class="panel" data-section-id="section-2"><details open><summary><h2>Outlook</h2></summary><div class="body"><div class="toolbar"><button data-days="5" aria-pressed="true">5 days</button><button data-days="10" aria-pressed="false">10 days</button><button data-days="30" aria-pressed="false">30 days</button></div><p class="muted">Choose a day to inspect its full planetary chart. Outlook focuses on rise and set times for the Sun, Moon, and selected planet.</p><div class="toolbar"><label for="focus">Planet</label><select id="focus" style="background:#263852;color:#edf3ff;border:1px solid #4b607c;border-radius:9px;padding:9px"></select></div><div class="scroll"><table><thead><tr><th>Date</th><th>Sunrise</th><th>Sunset</th><th>Moonrise</th><th>Moonset</th><th id="focushead">Planet rise</th><th>Set</th></tr></thead><tbody id="outlook"></tbody></table></div></div></details></section>
