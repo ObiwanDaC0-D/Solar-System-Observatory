@@ -49,6 +49,8 @@ th{position:sticky;top:0;background:#17253d;z-index:1}th,td{font-variant-numeric
 .observation-controls button{padding:8px 4px;font-size:clamp(12px,3.5vw,15px)}
 .coordinate-controls{margin:8px 0 12px}.coordinate-controls button{width:100%}
 @media(min-width:700px){.observation-controls{grid-template-columns:minmax(170px,1.2fr) 1fr 1fr;max-width:650px}.coordinate-controls button{width:auto}}
+/* Movable subpanels within Sky Arcs */
+#skyArcsLayout{display:flex;flex-direction:column;gap:12px}#skyArcsLayout>.inspect-disclosure{margin:0!important}#skyArcsLayout>.sky-chart-block{min-width:0}#skyArcsLayout>.inspect-disclosure>.inspect-summary{padding-right:46px;position:relative}#skyArcsLayout .subsection-grip{width:40px;height:40px;min-height:40px;display:grid;place-items:center;position:absolute;right:0;top:50%;transform:translateY(-50%);border:1px solid #455c74;border-radius:9px;background:#243851;color:#b9d4e3;touch-action:none;cursor:grab;font-size:22px;line-height:1;user-select:none}#skyArcsLayout .subsection-grip:focus-visible{outline:2px solid #8ddbd0;outline-offset:2px}#skyArcsLayout>.is-dragging{opacity:.8;border-color:#8ddbd0}#skyArcsLayout>.is-dragging>.inspect-content,#skyArcsLayout>.is-dragging>.chartwrap,#skyArcsLayout>.is-dragging>.readout{visibility:hidden}#skyArcsLayout>.drop-before{box-shadow:0 -4px 0 #8ddbd0}#skyArcsLayout>.drop-after{box-shadow:0 4px 0 #8ddbd0}.sky-chart-heading{position:relative;min-height:44px;display:flex;align-items:center;padding-right:46px}.sky-chart-heading .muted{font-weight:650;color:#8ddbd0}
 </style></head><body><main>
 <header><div><div class="eyebrow">CELESTIAL RHYTHMS · PLANETARY EPHEMERIDES</div><h1>Solar System Observatory</h1><div class="muted" id="place">Huntington, West Virginia · 38.415° N, 82.445° W</div></div></header>
 <div class="observation-sticky" role="group" aria-label="Observation date and location"><div class="controls observation-controls"><input id="date" type="date" aria-label="Observation date"><button id="today">Today</button><button id="gps">Use GPS</button></div></div><div class="coordinate-controls"><button id="coords">Coordinates</button></div>
@@ -59,13 +61,13 @@ th{position:sticky;top:0;background:#17253d;z-index:1}th,td{font-variant-numeric
 <div class="scroll"><table><thead><tr><th>Body</th><th>Rise</th><th>Peak altitude</th><th>Set</th><th>Sky time</th></tr></thead><tbody id="daily"></tbody></table></div>
 </div></details></section>
 <section class="panel" data-section-id="section-1"><details open><summary><h2>Sky Arcs</h2></summary><div class="body">
-<p class="muted">Compare celestial altitude throughout the day. Drag the chart to inspect any time.</p><details class="note inspect-disclosure" id="viewDisclosure" open style="margin:12px 0"><summary class="inspect-summary"><strong style="color:#8ddbd0">View</strong></summary><div class="inspect-content">
+<p class="muted">Compare celestial altitude throughout the day. Drag the chart to inspect any time.</p><div id="skyArcsLayout" aria-label="Reorder Sky Arcs controls and chart"><details class="note inspect-disclosure" id="viewDisclosure" open style="margin:12px 0"><summary class="inspect-summary"><strong style="color:#8ddbd0">View</strong></summary><div class="inspect-content">
 <div class="toolbar"><button id="above" aria-pressed="true">Above horizon</button><button id="full" aria-pressed="false">Full sky</button><button id="all">Select all</button><button id="none">Clear planets</button></div><div class="toolbar" style="margin-top:5px"><button id="toggleNow" aria-pressed="true">Now line: On</button><button id="jumpNow">Jump to now</button></div></div></details>
 <details class="note inspect-disclosure" id="bodiesDisclosure" open style="margin:12px 0"><summary class="inspect-summary"><strong style="color:#8ddbd0">Celestial bodies</strong></summary><div class="inspect-content">
 <div class="chips" id="selectors"></div></div></details>
-<div class="muted" id="chartcomparison" style="margin:8px 0;color:#8ddbd0"></div>
+<div class="sky-chart-block" id="skyChartBlock"><div class="sky-chart-heading"><span class="muted">Celestial arcs</span></div><div class="muted" id="chartcomparison" style="margin:8px 0;color:#8ddbd0"></div>
 <div class="chartwrap"><svg id="chart" viewBox="0 0 760 340" tabindex="0" role="img" aria-label="Interactive celestial altitude chart"></svg></div>
-<div class="readout" id="readout" aria-live="polite">Select a time on the chart to inspect celestial positions.</div>
+<div class="readout" id="readout" aria-live="polite">Select a time on the chart to inspect celestial positions.</div></div>
 <details class="note inspect-disclosure" id="planetInspector" open style="margin:15px 0 12px">
 <summary class="inspect-summary"><strong style="color:#8ddbd0">Inspect</strong></summary>
 <div class="inspect-content"><button type="button" id="clearPlanetHighlight" class="inspect-clear" hidden>Clear selection</button>
@@ -75,8 +77,7 @@ th{position:sticky;top:0;background:#17253d;z-index:1}th,td{font-variant-numeric
 <div id="planetHighlightDetails" class="muted" style="margin-top:10px" aria-live="polite"></div>
 <div id="inspectSharedResults" hidden><div class="shared-heading" style="margin-top:10px"><strong id="sharedtitle" style="color:#8ddbd0">Sun + Moon shared sky</strong><strong id="shared" style="font-size:20px">—</strong></div><div id="sharedwindows" class="muted" style="margin-top:8px"></div><div id="sharedsummary" class="muted" style="margin-top:6px"></div></div>
 </div></details>
-
-
+</div>
 </div></details></section>
 <section class="panel" data-section-id="section-2"><details open><summary><h2>Outlook</h2></summary><div class="body"><div class="toolbar"><button data-days="5" aria-pressed="true">5 days</button><button data-days="10" aria-pressed="false">10 days</button><button data-days="30" aria-pressed="false">30 days</button></div><p class="muted">Choose a day to inspect its full planetary chart. Outlook focuses on rise and set times for the Sun, Moon, and selected planet.</p><div class="toolbar"><label for="focus">Planet</label><select id="focus" style="background:#263852;color:#edf3ff;border:1px solid #4b607c;border-radius:9px;padding:9px"></select></div><div class="scroll"><table><thead><tr><th>Date</th><th>Sunrise</th><th>Sunset</th><th>Moonrise</th><th>Moonset</th><th id="focushead">Planet rise</th><th>Set</th></tr></thead><tbody id="outlook"></tbody></table></div></div></details></section>
 
@@ -101,8 +102,8 @@ const bodies=[['Sun','#f4c879'],['Moon','#c9b8ff'],['Mercury','#b9c2cf'],['Venus
 const planets=bodies.slice(2).map(x=>x[0]);
 let highlightPlanet=null,inspectBody='Moon',inspectMode='position';
 const prefsKey='solar-observatory-v3';
-function savePrefs(){try{localStorage.setItem(prefsKey,JSON.stringify({selected:[...selected],sky,showNow,days,focus,inspectBody,inspectMode,inspectOpen:$('planetInspector').open,viewOpen:$('viewDisclosure').open,bodiesOpen:$('bodiesDisclosure').open,folds:Object.fromEntries([...document.querySelectorAll('#sectionLayout > .panel')].map(p=>[p.dataset.sectionId,p.querySelector('details').open])),order:[...document.querySelectorAll('#sectionLayout > .panel')].map(p=>p.dataset.sectionId)}))}catch{}}
-function restorePrefs(){try{const p=JSON.parse(localStorage.getItem(prefsKey)||'{}');if(Array.isArray(p.selected))selected=new Set(p.selected.filter(b=>bodies.some(([n])=>n===b)));if(['above','full'].includes(p.sky))sky=p.sky;if(typeof p.showNow==='boolean')showNow=p.showNow;if([5,10,30].includes(p.days))days=p.days;if(planets.includes(p.focus))focus=p.focus;if(p.inspectBody===null||['Moon',...planets].includes(p.inspectBody))inspectBody=p.inspectBody;if(['position','shared'].includes(p.inspectMode))inspectMode=p.inspectMode;if(typeof p.inspectOpen==='boolean')$('planetInspector').open=p.inspectOpen;if(typeof p.viewOpen==='boolean')$('viewDisclosure').open=p.viewOpen;if(typeof p.bodiesOpen==='boolean')$('bodiesDisclosure').open=p.bodiesOpen;if(p.folds&&typeof p.folds==='object')document.querySelectorAll('#sectionLayout > .panel').forEach((panel,i)=>{const v=Array.isArray(p.folds)?p.folds[i]:p.folds[panel.dataset.sectionId];if(typeof v==='boolean')panel.querySelector('details').open=v});if(Array.isArray(p.order)){const layout=$('sectionLayout');const sections=new Map([...layout.children].map(p=>[p.dataset.sectionId,p]));for(const id of p.order){if(sections.has(id))layout.append(sections.get(id))}}}catch{}document.querySelectorAll('.panel > details').forEach(d=>d.addEventListener('toggle',savePrefs));$('above').setAttribute('aria-pressed',String(sky==='above'));$('full').setAttribute('aria-pressed',String(sky==='full'));$('toggleNow').setAttribute('aria-pressed',String(showNow));$('toggleNow').textContent='Now line: '+(showNow?'On':'Off');document.querySelectorAll('[data-days]').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.days)===days)))}
+function savePrefs(){try{localStorage.setItem(prefsKey,JSON.stringify({selected:[...selected],sky,showNow,days,focus,inspectBody,inspectMode,skyOrder:[...$('skyArcsLayout').children].map(el=>el.id),inspectOpen:$('planetInspector').open,viewOpen:$('viewDisclosure').open,bodiesOpen:$('bodiesDisclosure').open,folds:Object.fromEntries([...document.querySelectorAll('#sectionLayout > .panel')].map(p=>[p.dataset.sectionId,p.querySelector('details').open])),order:[...document.querySelectorAll('#sectionLayout > .panel')].map(p=>p.dataset.sectionId)}))}catch{}}
+function restorePrefs(){try{const p=JSON.parse(localStorage.getItem(prefsKey)||'{}');if(Array.isArray(p.selected))selected=new Set(p.selected.filter(b=>bodies.some(([n])=>n===b)));if(['above','full'].includes(p.sky))sky=p.sky;if(typeof p.showNow==='boolean')showNow=p.showNow;if([5,10,30].includes(p.days))days=p.days;if(planets.includes(p.focus))focus=p.focus;if(p.inspectBody===null||['Moon',...planets].includes(p.inspectBody))inspectBody=p.inspectBody;if(['position','shared'].includes(p.inspectMode))inspectMode=p.inspectMode;if(Array.isArray(p.skyOrder)){const host=$('skyArcsLayout'),lookup=new Map([...host.children].map(el=>[el.id,el]));for(const id of p.skyOrder){if(lookup.has(id))host.append(lookup.get(id))}}if(typeof p.inspectOpen==='boolean')$('planetInspector').open=p.inspectOpen;if(typeof p.viewOpen==='boolean')$('viewDisclosure').open=p.viewOpen;if(typeof p.bodiesOpen==='boolean')$('bodiesDisclosure').open=p.bodiesOpen;if(p.folds&&typeof p.folds==='object')document.querySelectorAll('#sectionLayout > .panel').forEach((panel,i)=>{const v=Array.isArray(p.folds)?p.folds[i]:p.folds[panel.dataset.sectionId];if(typeof v==='boolean')panel.querySelector('details').open=v});if(Array.isArray(p.order)){const layout=$('sectionLayout');const sections=new Map([...layout.children].map(p=>[p.dataset.sectionId,p]));for(const id of p.order){if(sections.has(id))layout.append(sections.get(id))}}}catch{}document.querySelectorAll('.panel > details').forEach(d=>d.addEventListener('toggle',savePrefs));$('above').setAttribute('aria-pressed',String(sky==='above'));$('full').setAttribute('aria-pressed',String(sky==='full'));$('toggleNow').setAttribute('aria-pressed',String(showNow));$('toggleNow').textContent='Now line: '+(showNow?'On':'Off');document.querySelectorAll('[data-days]').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.days)===days)))}
 let explorerMode='multiple',explorerSelected=new Set(['Venus','Mars','Jupiter']);
 let chartSamples=new Map(),chartDrawScheduled=false,skyUpdateScheduled=false;let A,lat=38.415,lon=-82.445,selected=new Set(['Sun','Moon','Venus','Mars','Jupiter','Saturn']),sky='above',cursor=12,showNow=true,days=5,focus='Jupiter',cache=new Map(),dateKey='';
 const fmt=t=>t==null?'—':new Date(t).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
@@ -239,6 +240,56 @@ function initSectionReorder(){
  $('resetLayout').onclick=()=>{finish(false);for(const p of original)layout.append(p);savePrefs()};
 }
 
+
+function initSkyArcsReorder(){
+ const host=$('skyArcsLayout'),original=[...host.children];
+ let drag=null;
+ const clear=()=>{for(const el of host.children)el.classList.remove('drop-before','drop-after')};
+ function finish(commit){
+  if(!drag)return;
+  clearTimeout(drag.timer);
+  if(commit&&drag.active&&drag.target&&drag.target!==drag.panel){
+   host.insertBefore(drag.panel,drag.after?drag.target.nextSibling:drag.target);
+   savePrefs();
+  }
+  drag.panel.classList.remove('is-dragging');document.body.style.userSelect='';drag=null;clear();
+ }
+ document.addEventListener('pointermove',e=>{
+  if(!drag||e.pointerId!==drag.id)return;
+  if(!drag.active){if(Math.abs(e.clientY-drag.y)<9)return;clearTimeout(drag.timer);drag.active=true;drag.panel.classList.add('is-dragging');document.body.style.userSelect='none'}
+  e.preventDefault();clear();
+  let closest=null,dist=Infinity;
+  for(const el of host.children){if(el===drag.panel)continue;const r=el.getBoundingClientRect(),delta=Math.abs(e.clientY-(r.top+r.bottom)/2);if(delta<dist){dist=delta;closest=el}}
+  if(closest){const r=closest.getBoundingClientRect();drag.target=closest;drag.after=e.clientY>(r.top+r.bottom)/2;closest.classList.add(drag.after?'drop-after':'drop-before')}
+  if(e.clientY<90)window.scrollBy(0,-14);else if(e.clientY>window.innerHeight-80)window.scrollBy(0,14);
+ },{passive:false});
+ document.addEventListener('pointerup',e=>{if(drag&&drag.id===e.pointerId)finish(true)});
+ document.addEventListener('pointercancel',e=>{if(drag&&drag.id===e.pointerId)finish(false)});
+ for(const panel of original){
+  const heading=panel.matches('details')?panel.querySelector(':scope > summary'):panel.querySelector('.sky-chart-heading');
+  const name=heading.textContent.trim();
+  const grip=document.createElement('button');grip.type='button';grip.className='subsection-grip';grip.textContent='⠿';
+  grip.setAttribute('aria-label','Move '+name+'. Use arrow keys to reorder');
+  grip.title='Hold and drag, or use arrow keys';
+  grip.addEventListener('click',e=>{e.preventDefault();e.stopPropagation()});
+  grip.addEventListener('pointerdown',e=>{
+   if(e.button!==0||drag)return;
+   e.preventDefault();e.stopPropagation();
+   drag={panel,id:e.pointerId,y:e.clientY,active:false,target:null,after:false};
+   drag.timer=setTimeout(()=>{if(drag&&drag.panel===panel){drag.active=true;panel.classList.add('is-dragging');document.body.style.userSelect='none'}},240);
+  });
+  grip.addEventListener('keydown',e=>{
+   if(e.key!=='ArrowUp'&&e.key!=='ArrowDown')return;
+   e.preventDefault();e.stopPropagation();
+   const adjacent=e.key==='ArrowUp'?panel.previousElementSibling:panel.nextElementSibling;
+   if(!adjacent)return;
+   if(e.key==='ArrowUp')host.insertBefore(panel,adjacent);else host.insertBefore(adjacent,panel);
+   grip.focus();savePrefs();
+  });
+  heading.append(grip);
+ }
+}
+
 function selectors(){const box=$('selectors');box.replaceChildren();for(const [body,color] of bodies){const button=document.createElement('button');button.type='button';button.className='body-choice';button.dataset.body=body;button.setAttribute('aria-pressed',String(selected.has(body)));button.setAttribute('aria-label',body+' — '+(selected.has(body)?'selected':'not selected'));const dot=document.createElement('span');dot.className='dot';dot.style.background=color;dot.setAttribute('aria-hidden','true');button.append(dot,document.createTextNode(body));button.onclick=()=>{selected.has(body)?selected.delete(body):selected.add(body);button.setAttribute('aria-pressed',String(selected.has(body)));button.setAttribute('aria-label',body+' — '+(selected.has(body)?'selected':'not selected'));updateHighlight();overview();draw();skyMap();savePrefs()};box.append(button)}}
 
 $('toggleNow').onclick=()=>{showNow=!showNow;$('toggleNow').setAttribute('aria-pressed',String(showNow));$('toggleNow').textContent='Now line: '+(showNow?'On':'Off');draw();savePrefs()};
@@ -255,7 +306,7 @@ for(let btn of document.querySelectorAll('[data-days]'))btn.onclick=()=>{days=Nu
 $('focus').innerHTML=planets.map(b=>'<option '+(b===focus?'selected':'')+'>'+b+'</option>').join('');$('focus').onchange=()=>{focus=$('focus').value;outlook();savePrefs()};
 async function bootObservatory(){
  try{
-   restorePrefs();initSectionReorder();selectors();initHighlight();explorerInit();
+   restorePrefs();initSectionReorder();initSkyArcsReorder();selectors();initHighlight();explorerInit();
  }catch(error){
    $('loading').textContent='Interface initialization failed: '+(error?.message||String(error));
    $('loading').classList.add('error');
