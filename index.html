@@ -51,6 +51,11 @@ th{position:sticky;top:0;background:#17253d;z-index:1}th,td{font-variant-numeric
 @media(min-width:700px){.observation-controls{grid-template-columns:minmax(170px,1.2fr) 1fr 1fr;max-width:650px}.coordinate-controls button{width:auto}}
 /* Movable subpanels within Sky Arcs */
 #skyArcsLayout{display:flex;flex-direction:column;gap:12px}#skyArcsLayout>.inspect-disclosure{margin:0!important}#skyArcsLayout>.sky-chart-block{min-width:0}#skyArcsLayout>.inspect-disclosure>.inspect-summary{padding-right:46px;position:relative}#skyArcsLayout .subsection-grip{width:40px;height:40px;min-height:40px;display:grid;place-items:center;position:absolute;right:0;top:50%;transform:translateY(-50%);border:1px solid #455c74;border-radius:9px;background:#243851;color:#b9d4e3;touch-action:none;cursor:grab;font-size:22px;line-height:1;user-select:none}#skyArcsLayout .subsection-grip:focus-visible{outline:2px solid #8ddbd0;outline-offset:2px}#skyArcsLayout>.is-dragging{opacity:.8;border-color:#8ddbd0}#skyArcsLayout>.is-dragging>.inspect-content,#skyArcsLayout>.is-dragging>.chartwrap,#skyArcsLayout>.is-dragging>.readout{visibility:hidden}#skyArcsLayout>.drop-before{box-shadow:0 -4px 0 #8ddbd0}#skyArcsLayout>.drop-after{box-shadow:0 4px 0 #8ddbd0}.sky-chart-heading{position:relative;min-height:44px;display:flex;align-items:center;padding-right:46px}.sky-chart-heading .muted{font-weight:650;color:#8ddbd0}
+/* Give Celestial Arcs its own matching card container. */
+#skyArcsLayout>#skyChartBlock{background:#102238;border:1px solid #344c64;border-radius:13px;padding:13px 15px;min-width:0}
+#skyArcsLayout>#skyChartBlock .sky-chart-heading{margin-bottom:6px}
+#skyArcsLayout>#skyChartBlock .chartwrap{width:100%}
+@media(max-width:600px){#skyArcsLayout>#skyChartBlock{padding:12px}}
 /* Combined disclosure and reorder handles replace separate chevrons. */
 #sectionLayout>.panel>details>summary:before{display:none}
 #skyArcsLayout>.inspect-disclosure>.inspect-summary:after{display:none}
@@ -68,7 +73,7 @@ th{position:sticky;top:0;background:#17253d;z-index:1}th,td{font-variant-numeric
 <div class="toolbar"><button id="above" aria-pressed="true">Above horizon</button><button id="full" aria-pressed="false">Full sky</button></div><div class="toolbar" style="margin-top:5px"><button id="toggleNow" aria-pressed="true">Now line: On</button><button id="jumpNow">Jump to now</button></div></div></details>
 <details class="note inspect-disclosure" id="bodiesDisclosure" open style="margin:12px 0"><summary class="inspect-summary"><strong style="color:#8ddbd0">Celestial bodies</strong></summary><div class="inspect-content">
 <div class="chips" id="selectors"></div><div class="toolbar" style="margin-top:10px"><button id="all">Select all</button><button id="none">Clear planets</button></div></div></details>
-<div class="sky-chart-block" id="skyChartBlock"><div class="sky-chart-heading"><span class="muted">Celestial arcs</span></div><div class="muted" id="chartcomparison" style="margin:8px 0;color:#8ddbd0"></div>
+<div class="sky-chart-block note" id="skyChartBlock"><div class="sky-chart-heading"><span class="muted">Celestial arcs</span></div><div class="muted" id="chartcomparison" style="margin:8px 0;color:#8ddbd0"></div>
 <div class="chartwrap"><svg id="chart" viewBox="0 0 760 340" tabindex="0" role="img" aria-label="Interactive celestial altitude chart"></svg></div>
 <div class="readout" id="readout" aria-live="polite">Select a time on the chart to inspect celestial positions.</div></div>
 <details class="note inspect-disclosure" id="planetInspector" open style="margin:15px 0 12px">
