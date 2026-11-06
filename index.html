@@ -168,6 +168,61 @@ function initHighlight(){
  $('inspectShared').onclick=()=>{inspectMode='shared';updateHighlight();draw();savePrefs()};
  updateHighlight()
 }
+
+// Reorder sections by dragging the heading handle or using keyboard arrows.
+function initSectionReorder(){
+ const layout=$('sectionLayout'),original=[...layout.children];
+ let drag=null;
+ function clearMarks(){for(const p of layout.children)p.classList.remove('drop-before','drop-after')}
+ function finish(commit){
+  if(!drag)return;
+  clearTimeout(drag.timer);
+  if(commit&&drag.active&&drag.target&&drag.target!==drag.panel){
+   layout.insertBefore(drag.panel,drag.after?drag.target.nextSibling:drag.target);
+   savePrefs();
+  }
+  drag.panel.classList.remove('is-dragging');document.body.style.userSelect='';
+  drag=null;clearMarks();
+ }
+ document.addEventListener('pointermove',e=>{
+  if(!drag||e.pointerId!==drag.id)return;
+  if(!drag.active){
+   if(Math.abs(e.clientY-drag.y)<9)return;
+   clearTimeout(drag.timer);drag.active=true;
+   drag.panel.classList.add('is-dragging');document.body.style.userSelect='none';
+  }
+  e.preventDefault();clearMarks();
+  let nearest=null,distance=Infinity;
+  for(const p of layout.children){if(p===drag.panel)continue;const r=p.getBoundingClientRect(),d=Math.abs(e.clientY-(r.top+r.bottom)/2);if(d<distance){distance=d;nearest=p}}
+  if(nearest){const r=nearest.getBoundingClientRect();drag.target=nearest;drag.after=e.clientY>(r.top+r.bottom)/2;nearest.classList.add(drag.after?'drop-after':'drop-before')}
+  if(e.clientY<65)window.scrollBy(0,-18);else if(e.clientY>window.innerHeight-65)window.scrollBy(0,18);
+ },{passive:false});
+ document.addEventListener('pointerup',e=>{if(drag&&e.pointerId===drag.id)finish(true)});
+ document.addEventListener('pointercancel',e=>{if(drag&&e.pointerId===drag.id)finish(false)});
+ for(const panel of original){
+  const summary=panel.querySelector('summary'),name=summary.querySelector('h2').textContent;
+  const handle=document.createElement('button');handle.type='button';handle.className='section-grip';handle.textContent='⠿';
+  handle.setAttribute('aria-label','Move '+name+'. Use arrow keys to reorder');
+  handle.title='Hold and drag, or use arrow keys';
+  handle.addEventListener('click',e=>{e.preventDefault();e.stopPropagation()});
+  handle.addEventListener('pointerdown',e=>{
+   if(e.button!==0||drag)return;e.preventDefault();e.stopPropagation();
+   drag={panel,id:e.pointerId,y:e.clientY,active:false,target:null,after:false,timer:null};
+   drag.timer=setTimeout(()=>{if(drag&&drag.panel===panel){drag.active=true;panel.classList.add('is-dragging');document.body.style.userSelect='none'}},240);
+  });
+  handle.addEventListener('keydown',e=>{
+   if(e.key!=='ArrowUp'&&e.key!=='ArrowDown')return;
+   e.preventDefault();e.stopPropagation();
+   const sibling=e.key==='ArrowUp'?panel.previousElementSibling:panel.nextElementSibling;
+   if(!sibling)return;
+   if(e.key==='ArrowUp')layout.insertBefore(panel,sibling);else layout.insertBefore(sibling,panel);
+   handle.focus();savePrefs();
+  });
+  summary.append(handle);
+ }
+ $('resetLayout').onclick=()=>{finish(false);for(const p of original)layout.append(p);savePrefs()};
+}
+
 function selectors(){const box=$('selectors');box.replaceChildren();for(const [body,color] of bodies){const button=document.createElement('button');button.type='button';button.className='body-choice';button.dataset.body=body;button.setAttribute('aria-pressed',String(selected.has(body)));button.setAttribute('aria-label',body+' — '+(selected.has(body)?'selected':'not selected'));const dot=document.createElement('span');dot.className='dot';dot.style.background=color;dot.setAttribute('aria-hidden','true');button.append(dot,document.createTextNode(body));button.onclick=()=>{selected.has(body)?selected.delete(body):selected.add(body);button.setAttribute('aria-pressed',String(selected.has(body)));button.setAttribute('aria-label',body+' — '+(selected.has(body)?'selected':'not selected'));updateHighlight();overview();draw();skyMap();savePrefs()};box.append(button)}}
 
 $('toggleNow').onclick=()=>{showNow=!showNow;$('toggleNow').setAttribute('aria-pressed',String(showNow));$('toggleNow').textContent='Now line: '+(showNow?'On':'Off');draw();savePrefs()};
