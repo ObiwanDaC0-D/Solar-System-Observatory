@@ -59,8 +59,6 @@ th{position:sticky;top:0;background:#17253d;z-index:1}th,td{font-variant-numeric
 </style></head><body><main>
 <header><div><div class="eyebrow">CELESTIAL RHYTHMS · PLANETARY EPHEMERIDES</div><h1>Solar System Observatory</h1><div class="muted" id="place">Huntington, West Virginia · 38.415° N, 82.445° W</div></div></header>
 <div class="observation-sticky" role="group" aria-label="Observation date and location"><div class="controls observation-controls"><input id="date" type="date" aria-label="Observation date"><button id="today">Today</button><button id="gps">Use GPS</button></div></div><div class="coordinate-controls"><button id="coords">Coordinates</button></div>
-<div id="loading" class="muted" role="status">Loading astronomy engine…</div>
-<div id="layoutToolbar" class="layout-toolbar"><span class="muted">Customize section order using the drag handles.</span><button id="resetLayout" type="button">Reset layout</button></div>
 <div id="sectionLayout" aria-label="Reorderable observatory sections">
 <section class="panel" data-section-id="section-0"><details open id="fold-daily"><summary><h2>Overview</h2></summary><div class="body"><p class="muted">Rise, peak altitude time, set, and time above the horizon for your selected bodies.</p>
 <div class="scroll"><table><thead><tr><th>Body</th><th>Rise</th><th>Peak altitude</th><th>Set</th><th>Sky time</th></tr></thead><tbody id="daily"></tbody></table></div>
@@ -99,6 +97,8 @@ th{position:sticky;top:0;background:#17253d;z-index:1}th,td{font-variant-numeric
 
 <section class="panel" data-section-id="section-6"><details open><summary><h2>Moon phase</h2></summary><div class="body"><div class="phase"><div class="moonicon" id="moonicon" aria-hidden="true">🌙</div><div><strong id="phasename" style="font-size:23px">—</strong><div class="muted">Geocentric illuminated fraction, at local noon</div></div></div><div class="stats"><div class="stat">Illumination<strong id="illum">—</strong></div><div class="stat">Moon age<strong id="age">—</strong></div><div class="stat">Synodic cycle<strong>29.53 d</strong></div></div></div></details></section>
 </div>
+<div id="loading" class="muted" role="status">Loading astronomy engine…</div>
+<div id="layoutToolbar" class="layout-toolbar"><span class="muted">Customize section order using the drag handles.</span><button id="resetLayout" type="button">Reset layout</button></div>
 <footer><strong>Data and accuracy</strong><p>Planetary and lunar positions are calculated locally with Astronomy Engine (VSOP87/ELP-based analytical astronomy). This is not a live telescope feed. Rise/set calculations use geometric altitude crossing at 0°, except the Sun, which uses −0.833° to approximate the visible solar limb and refraction. Results are approximate and can differ from observed times due to terrain, elevation, weather, and atmospheric refraction. Times are shown in the browser's local time zone, not automatically the time zone of manually entered coordinates. An internet connection is needed to load the astronomy library. Do not use for navigation or safety-critical decisions.</p><div id="status"></div></footer>
 </main>
 <script type="module">
