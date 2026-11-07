@@ -146,7 +146,7 @@ button:focus-visible,select:focus-visible,.subsection-grip:focus-visible{outline
 <div class="chips" id="selectors"></div><div class="toolbar" style="margin-top:10px"><button id="all">Select all</button><button id="none">Clear planets</button></div></div></details>
 <div class="sky-chart-block note" id="skyChartBlock"><div class="sky-chart-heading"><span class="muted">Celestial arcs</span></div><div class="muted" id="chartcomparison" style="margin:8px 0;color:#8ddbd0"></div>
 <div class="chartwrap"><svg id="chart" viewBox="0 0 760 340" tabindex="0" role="img" aria-label="Interactive celestial altitude chart"></svg></div>
-<div class="readout" id="readout" aria-live="polite">Drag across the chart to inspect a time.</div></div>
+</div>
 <details class="note inspect-disclosure" id="planetInspector" open style="margin:15px 0 12px">
 <summary class="inspect-summary"><strong style="color:#8ddbd0">Inspect</strong></summary>
 <div class="inspect-content"><button type="button" id="clearPlanetHighlight" class="inspect-clear" hidden>Clear selection</button>
@@ -217,8 +217,7 @@ for(let [body,color] of bodies){if(!selected.has(body)&&body!=='Sun'&&body!==com
 const now=Date.now();if(showNow&&now>=d.a&&now<d.b){let nx=x(now);svgEl('line',{x1:nx,x2:nx,y1:T,y2:T+H,stroke:'#8ddbd0','stroke-width':2.5,'stroke-dasharray':'6 4'},chart);let labelX=Math.max(L+19,Math.min(L+W-19,nx));svgEl('rect',{x:labelX-19,y:T+2,width:38,height:18,rx:5,fill:'#8ddbd0'},chart);svgEl('text',{x:labelX,y:T+15,'text-anchor':'middle',fill:'#0b1628','font-size':11,'font-weight':700},chart,'NOW')}
 let inspect=d.a+(d.b-d.a)*cursor/24,xx=x(inspect);svgEl('line',{x1:xx,x2:xx,y1:T,y2:T+H,stroke:'#ffffff','stroke-dasharray':'4 5',opacity:.65},chart);
 for(let [body,color] of bodies)if(selected.has(body)||body==='Sun'||body===compare){let v=cachedChartAltitude(body,inspect);if(v>=min&&v<=max)svgEl('circle',{cx:xx,cy:y(v),r:4,fill:color,stroke:'#0b1628','stroke-width':1.5},chart)}
-let vals=bodies.filter(x=>selected.has(x[0])||x[0]==='Sun'||x[0]===compare).map(([b])=>'<span style="color:'+col(b)+'">'+b+' '+cachedChartAltitude(b,inspect).toFixed(1)+'°</span>').join(' · ');
-$('readout').innerHTML='<strong>'+fmt(inspect)+'</strong> · '+(vals||'Select celestial bodies to inspect.');
+
 chart.onpointerdown=e=>{chart.setPointerCapture(e.pointerId);move(e)};chart.onpointermove=e=>{if(e.buttons)move(e)};function move(e){let r=chart.getBoundingClientRect(),p=(e.clientX-r.left)/r.width;cursor=Math.max(0,Math.min(24,(p*760-L)/W*24));scheduleChartDraw();scheduleSkyUpdate()}
 chart.onkeydown=e=>{if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();cursor=Math.max(0,Math.min(24,cursor+(e.key==='ArrowRight'?.25:-.25)));scheduleChartDraw();scheduleSkyUpdate()}}
 }
