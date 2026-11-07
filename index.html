@@ -223,6 +223,14 @@ $('explorerWindows').textContent=windows.length?windows.map((w,i)=>fmt(w[0])+' �
 let chart=$('explorerChart');chart.replaceChildren();let L=62,T=25,W=666,H=190,x=t=>L+W*(t-d.a)/(d.b-d.a);for(let h=0;h<=24;h+=3){let xx=L+W*h/24;svgEl('line',{x1:xx,x2:xx,y1:T,y2:T+H,stroke:'#344760'},chart);svgEl('text',{x:xx,y:245,'text-anchor':'middle',fill:'#a9bad1','font-size':11},chart,fmt(d.a+(d.b-d.a)*h/24).replace(':00',''))}
 let rows=maxMode?planets:names;let rh=rows.length?H/rows.length:H;for(let i=0;i<rows.length;i++){let b=rows[i],yy=T+i*rh+rh*.18;svgEl('text',{x:4,y:yy+rh*.42,fill:col(b),'font-size':11},chart,b.slice(0,7));for(let w of d.items[b].windows)svgEl('rect',{x:x(w[0]),y:yy,width:Math.max(1,x(w[1])-x(w[0])),height:Math.max(7,rh*.62),rx:3,fill:col(b),opacity:.8},chart)}
 for(let w of windows)svgEl('rect',{x:x(w[0]),y:T,width:Math.max(1,x(w[1])-x(w[0])),height:H,fill:'#8ddbd0',opacity:.18,stroke:'#8ddbd0','stroke-width':2},chart);
+const currentTime=Date.now();
+if(currentTime>=d.a&&currentTime<d.b){
+  const nowX=x(currentTime);
+  svgEl('line',{x1:nowX,x2:nowX,y1:T,y2:T+H,stroke:'#8ddbd0','stroke-width':2.5,'stroke-dasharray':'5 4',opacity:.98},chart);
+  const tagX=Math.max(L+20,Math.min(L+W-20,nowX));
+  svgEl('rect',{x:tagX-20,y:T-21,width:40,height:18,rx:5,fill:'#8ddbd0'},chart);
+  svgEl('text',{x:tagX,y:T-8,'text-anchor':'middle',fill:'#0b1628','font-size':11,'font-weight':700},chart,'NOW');
+}
 if(maxMode){let pairs=[];for(let i=0;i<planets.length;i++)for(let j=i+1;j<planets.length;j++){let a=planets[i],b=planets[j],ws=intersectMany(d,[a,b]);pairs.push({a,b,total:sumWindows(ws)})}pairs.sort((a,b)=>b.total-a.total);$('explorerRanking').innerHTML='<strong>Planet-pair overlap ranking</strong><table><thead><tr><th>Pair</th><th>Shared time</th></tr></thead><tbody>'+pairs.map(p=>'<tr><td>'+p.a+' + '+p.b+'</td><td>'+dur(p.total)+'</td></tr>').join('')+'</tbody></table>'}else $('explorerRanking').innerHTML=''}
 function overview(){let d=day(dateKey);$('daily').innerHTML=bodies.filter(([b])=>selected.has(b)).map(([b,color])=>{let v=d.items[b],tr=transit(b,d.a,d.b);return '<tr><td><span class="dot" style="background:'+color+'"></span>'+b+'</td><td>'+fmt(v.rises[0])+'</td><td>'+fmt(tr)+'</td><td>'+fmt(v.sets[0])+'</td><td>'+dur(v.total)+'</td></tr>'}).join('')||'<tr><td colspan="5" class="muted">Select a celestial body in 24-hour Celestial Arcs to display its daily data.</td></tr>';sharedView()}
 function cards(){let d=day(dateKey),t=d.a+(d.b-d.a)*cursor/24;let sun=altitude('Sun',t);$('cards').innerHTML=planets.map(b=>{let a=altitude(b,t),v=d.items[b],status=a<=0?'Below horizon':sun>-.833?'Above horizon · daylight':sun>-18?'Above horizon · twilight':'Above horizon · night';return '<div class="planetcard"><div><span class="dot" style="background:'+col(b)+'"></span><strong>'+b+'</strong></div><div class="big">'+a.toFixed(1)+'°</div><div class="muted">'+status+'</div><div class="muted" style="margin-top:10px">Rise '+fmt(v.rises[0])+' · Set '+fmt(v.sets[0])+'</div></div>'}).join('')}
@@ -422,7 +430,7 @@ function selectors(){const box=$('selectors');box.replaceChildren();for(const [b
 
 $('toggleNow').onclick=()=>{showNow=!showNow;$('toggleNow').setAttribute('aria-pressed',String(showNow));$('toggleNow').textContent='Now line: '+(showNow?'On':'Off');draw();savePrefs()};
 $('jumpNow').onclick=()=>{let now=new Date();$('date').value=iso(now);let [a,b]=bounds(iso(now));cursor=(now.getTime()-a)/(b-a)*24;render()};
-setInterval(()=>{if(A&&showNow&&dateKey===iso(new Date()))scheduleChartDraw()},60000);
+setInterval(()=>{if(A&&dateKey===iso(new Date())){if(showNow)scheduleChartDraw();explorerUpdate()}},60000);
 $('date').value=iso(new Date());$('today').onclick=()=>{$('date').value=iso(new Date());render()};$('date').onchange=render;
 $('gps').onclick=()=>{if(!navigator.geolocation){alert('Geolocation is unavailable.');return}navigator.geolocation.getCurrentPosition(p=>{lat=p.coords.latitude;lon=p.coords.longitude;cache.clear();chartSamples.clear();$('place').textContent=lat.toFixed(4)+'°, '+lon.toFixed(4)+'° · GPS';render()},e=>alert('Location unavailable: '+e.message),{enableHighAccuracy:false,timeout:12000})};
 $('coords').onclick=()=>{let s=prompt('Latitude, longitude (decimal degrees)',lat+', '+lon);if(s===null)return;let v=s.split(',').map(Number);if(v.length!==2||!v.every(Number.isFinite)||Math.abs(v[0])>90||Math.abs(v[1])>180){alert('Enter valid latitude and longitude, separated by a comma.');return}lat=v[0];lon=v[1];cache.clear();chartSamples.clear();$('place').textContent=lat.toFixed(4)+'°, '+lon.toFixed(4)+'° · manual coordinates';render()};
