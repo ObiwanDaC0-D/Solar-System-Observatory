@@ -1,5 +1,13 @@
 # Solar System Observatory
 
+Solar System Observatory helps users explore the changing positions of the Sun, Moon, and planets from a selected location. It provides interactive 24-hour altitude curves, horizon events, daily sky-duration estimates, Sun–Moon overlap, lunar phase information, and multi-day outlooks. Calculations use astronomical models with known limitations related to local terrain, refraction, and time zones.
+
+**At a glance:** An interactive sky observatory tracking the Sun, Moon, and planets with daily altitude arcs, rise and set events, sky visibility, shared-sky time, and multi-day outlooks.
+
+---
+
+# Solar System Observatory
+
 Responsive static astronomy application modeled on Sun & Moon Observatory, featuring the Sun, Moon, and Mercury through Neptune. No antipodal section.
 
 ## Features
